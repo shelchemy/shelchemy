@@ -1,0 +1,20 @@
+[run]
+omit =
+    # abstract classes
+    #*/abs/*
+    
+    # examples
+    */examples/*
+
+    # unused algebra part
+    src/hosh/__init__.py
+    src/hosh/misc/helper.py
+    
+    venv
+    .venv
+
+[report]
+exclude_lines =
+    @abstractmethod
+    @abc.abstractmethod
+    pragma: no cover

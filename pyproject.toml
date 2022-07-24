@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "shelchemy"
+version = "0.220724.0"
+description = "Shelve-like dict using sqlachemy as backend"
+authors = ["davips <dpsabc@gmail.com>"]
+license = "GPL"
+readme = 'README.md'
+packages = [
+    { include = "shelchemy", from = "src" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+SQLAlchemy = "^1.4.39"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
