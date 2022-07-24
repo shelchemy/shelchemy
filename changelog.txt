@@ -1,1 +1,1 @@
-Fix rmul,etc which was taking precedence over mul,etc of other types
+Move shelchemy from idict

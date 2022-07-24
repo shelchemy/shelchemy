@@ -6,10 +6,6 @@ omit =
     # examples
     */examples/*
 
-    # unused algebra part
-    src/hosh/__init__.py
-    src/hosh/misc/helper.py
-    
     venv
     .venv
 

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shelchemy"
-version = "0.220724.0"
+version = "0.220724.1"
 description = "Shelve-like dict using sqlachemy as backend"
 authors = ["davips <dpsabc@gmail.com>"]
 license = "GPL"
@@ -10,10 +10,22 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 SQLAlchemy = "^1.4.39"
 
 [tool.poetry.dev-dependencies]
+autoreadme = "^0.2102.20"
+pytest = "^6.2.2"
+pytest-cov = "^2.11.1"
+black = "^21.7b0"
+pdoc3 = "^0.10.0"
+pylint = "^2.7.4"
+#pypiserver = "^1.4.2"
+#passlib = "^1.7.4"
+#numpy = "^1.21.2"
+pandas = "1.4.0"
+ipython = "^8.0.1"
+click = "8.0.4"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -14,13 +14,13 @@ echo; echo
 
 echo
 echo "----------------- gh workflow testing... -----------------------"
-read -p "press enter"
-sudo systemctl enable docker
-sudo systemctl start docker
-coverage xml
-act -j build
-sudo systemctl stop docker
-sudo systemctl disable docker
+# read -p "press enter"
+# sudo systemctl enable docker
+# sudo systemctl start docker
+# coverage xml
+# act -j build
+# sudo systemctl stop docker
+# sudo systemctl disable docker
 echo "----------------- gh workflow -----------------------"
 echo; echo
 
@@ -30,9 +30,9 @@ echo "----------------- docs/black... -----------------------"
 read -p "press enter"
 rm docs -rf
 poetry run black -l120 src/ tests/
-poetry run pdoc --html --force schelchemy -o docs
-mv docs/schelchemy/* docs/
-rm docs/schelchemy -rf
+poetry run pdoc --html --force shelchemy -o docs
+mv docs/shelchemy/* docs/
+rm docs/shelchemy -rf
 git add docs
 echo "----------------- docs/black done -----------------------"
 echo; echo

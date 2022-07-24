@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>shelchemy.core API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>shelchemy.core</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#  Copyright (c) 2021. Davi Pereira dos Santos
+#  This file is part of the schelchemy project.
+#  Please respect the license - more about this in the section (*) below.
+#
+#  schelchemy is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  schelchemy is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with schelchemy.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+#
+#  (*) Removing authorship by any means, e.g. by distribution of derived
+#  works or verbatim, obfuscated, compiled or rewritten versions of any
+#  part of this work is illegal and unethical regarding the effort and
+#  time spent here.
+from contextlib import contextmanager
+from hashlib import md5
+from typing import TypeVar
+
+from lazydf.compression import pack, unpack
+from sqlalchemy import BLOB, Column, String, create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session
+
+
+VT = TypeVar(&#34;VT&#34;)
+Base = declarative_base()
+
+
+class Content(Base):
+    __tablename__ = &#34;content&#34;
+    id = Column(String(40), primary_key=True)
+    blob = Column(BLOB)
+
+
+def check(key):
+    if not isinstance(key, str):
+        raise WrongKeyType(f&#34;Key must be string, not {type(key)}.&#34;, key)
+    return md5(key.encode()).hexdigest() if len(key) not in [32, 40] else key
+
+
+@contextmanager
+def sopen(
+    url=&#34;sqlite+pysqlite:///:memory:&#34;, autopack=True, ondup=&#34;overwrite&#34;, deterministic_packing=False, debug=False
+):
+    engine = create_engine(url, echo=debug)
+    Base.metadata.create_all(engine)
+    with Session(engine, autoflush=False) as session:
+        yield Cache(session, autopack, ondup, deterministic_packing)
+
+
+class Cache:
+    r&#34;&#34;&#34;
+    Dict-like persistence based on SQLAlchemy
+
+    str keys only
+
+    When len(key) not in [32, 40], key is internally hashed to a MD5 hexdigest
+
+    Usage:
+
+    &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;)
+    &gt;&gt;&gt; d[&#34;x&#34;] = 5
+    &gt;&gt;&gt; d[&#34;x&#34;]
+    5
+    &gt;&gt;&gt; for k, v in d.items():
+    ...     print(k, v)
+    9dd4e461268c8034f5c8564e155c67a6 5
+    &gt;&gt;&gt; &#34;x&#34; in d
+    True
+    &gt;&gt;&gt; len(d)
+    1
+    &gt;&gt;&gt; del d[&#34;x&#34;]
+    &gt;&gt;&gt; &#34;x&#34; in d
+    False
+    &gt;&gt;&gt; d
+    {}
+    &gt;&gt;&gt; with sopen() as db:
+    ...     &#34;x&#34; in db
+    ...     db
+    ...     db[&#34;x&#34;] = b&#34;asd&#34;
+    ...     db
+    ...     db[&#34;9dd4e461268c8034f5c8564e155c67a6&#34;] == b&#34;asd&#34;
+    ...     &#34;x&#34; in db
+    ...     db.x == b&#34;asd&#34;
+    ...     del db[&#34;x&#34;]
+    ...     &#34;x&#34; in db
+    False
+    {}
+    {&#39;9dd4e461268c8034f5c8564e155c67a6&#39;: b&#39;asd&#39;}
+    True
+    True
+    True
+    False
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        session=&#34;sqlite+pysqlite:///:memory:&#34;,
+        autopack=True,
+        ondup=&#34;overwrite&#34;,
+        deterministic_packing=False,
+        debug=False,
+    ):
+        if isinstance(session, str):
+
+            @contextmanager
+            def sessionctx():
+                engine = create_engine(url=session, echo=debug)
+                Base.metadata.create_all(engine)
+                session_ = Session(engine, autoflush=False)
+                yield session_
+                session_.close()
+
+        else:
+
+            @contextmanager
+            def sessionctx():
+                yield session
+
+        self.sessionctx = sessionctx
+        self.autopack = autopack
+        self.ondup = ondup
+        self.deterministic_packing = deterministic_packing
+
+    def __contains__(self, key):
+        key = check(key)
+        with self.sessionctx() as session:
+            return session.query(Content).filter_by(id=key).first() is not None
+
+    def __iter__(self):
+        with self.sessionctx() as session:
+            return (c.id for c in session.query(Content).all())
+
+    def __setitem__(self, key: str, value, packing=True):
+        key = check(key)
+        if self.autopack and packing:
+            value = pack(value, ensure_determinism=self.deterministic_packing)
+        elif isinstance(value, str):
+            value = value.encode()
+        with self.sessionctx() as session:
+            if self.ondup == &#34;overwrite&#34;:
+                session.query(Content).filter_by(id=key).delete()
+            if self.ondup == &#34;stop&#34; or session.query(Content).filter_by(id=key).first() is None:
+                content = Content(id=key, blob=value)
+                session.add(content)
+            session.commit()
+
+    def update(self, dic, packing=True):
+        with self.sessionctx() as session:
+            for k, v in dic.items():
+                k = check(k)
+                if self.autopack and packing:
+                    v = pack(v, ensure_determinism=self.deterministic_packing)
+                elif isinstance(v, str):
+                    v = v.encode()
+
+                if self.ondup == &#34;overwrite&#34;:
+                    session.query(Content).filter_by(id=k).delete()
+                if self.ondup == &#34;stop&#34; or session.query(Content).filter_by(id=k).first() is None:
+                    content = Content(id=k, blob=v)
+                    session.add(content)
+
+            session.commit()
+
+    def __getitem__(self, key, packing=True):
+        key = check(key)
+        with self.sessionctx() as session:
+            if ret := session.query(Content).get(key):
+                if ret is not None:
+                    ret = ret.blob
+                    if self.autopack and packing:
+                        ret = unpack(ret)
+        return ret
+
+    def __delitem__(self, key):
+        key = check(key)
+        with self.sessionctx() as session:
+            session.query(Content).filter_by(id=key).delete()
+            session.commit()
+
+    def __getattr__(self, key):
+        key_ = check(key)
+        if key_ in self:
+            return self[key_]
+        return self.__getattribute__(key)
+
+    def __len__(self):
+        with self.sessionctx() as session:
+            return session.query(Content).count()
+
+    def __repr__(self):
+        return repr(self.asdict)
+
+    def __str__(self):
+        return repr(self)
+
+    @property
+    def asdict(self):
+        return {k: self[k] for k in self}
+
+    def copy(self):
+        raise NotImplementedError
+
+    def keys(self):
+        return iter(self)
+
+    def items(self):
+        for k in self.keys():
+            yield k, self[k]
+
+
+&#34;&#34;&#34;
+multiuser                   |   single user
+----------------------------------------------
+cache = SQLA(session)       |               -&gt;  for already opened/permanent/global sessions
+with sqla(url) as cache:    |   shelve      -&gt;  a single session that open/close automatically
+cache = SQLA(DBMS url)      |   Disk        -&gt;
+----------------------------------------------
+Oka(web url); cache         |   dict        -&gt; dict-like cache  
+&#34;&#34;&#34;
+
+
+class WrongKeyType(Exception):
+    pass</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="shelchemy.core.check"><code class="name flex">
+<span>def <span class="ident">check</span></span>(<span>key)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def check(key):
+    if not isinstance(key, str):
+        raise WrongKeyType(f&#34;Key must be string, not {type(key)}.&#34;, key)
+    return md5(key.encode()).hexdigest() if len(key) not in [32, 40] else key</code></pre>
+</details>
+</dd>
+<dt id="shelchemy.core.sopen"><code class="name flex">
+<span>def <span class="ident">sopen</span></span>(<span>url='sqlite+pysqlite:///:memory:', autopack=True, ondup='overwrite', deterministic_packing=False, debug=False)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@contextmanager
+def sopen(
+    url=&#34;sqlite+pysqlite:///:memory:&#34;, autopack=True, ondup=&#34;overwrite&#34;, deterministic_packing=False, debug=False
+):
+    engine = create_engine(url, echo=debug)
+    Base.metadata.create_all(engine)
+    with Session(engine, autoflush=False) as session:
+        yield Cache(session, autopack, ondup, deterministic_packing)</code></pre>
+</details>
+</dd>
+</dl>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="shelchemy.core.Cache"><code class="flex name class">
+<span>class <span class="ident">Cache</span></span>
+<span>(</span><span>session='sqlite+pysqlite:///:memory:', autopack=True, ondup='overwrite', deterministic_packing=False, debug=False)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Dict-like persistence based on SQLAlchemy</p>
+<p>str keys only</p>
+<p>When len(key) not in [32, 40], key is internally hashed to a MD5 hexdigest</p>
+<p>Usage:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; d = Cache(&quot;sqlite+pysqlite:////tmp/sqla-test.db&quot;)
+&gt;&gt;&gt; d[&quot;x&quot;] = 5
+&gt;&gt;&gt; d[&quot;x&quot;]
+5
+&gt;&gt;&gt; for k, v in d.items():
+...     print(k, v)
+9dd4e461268c8034f5c8564e155c67a6 5
+&gt;&gt;&gt; &quot;x&quot; in d
+True
+&gt;&gt;&gt; len(d)
+1
+&gt;&gt;&gt; del d[&quot;x&quot;]
+&gt;&gt;&gt; &quot;x&quot; in d
+False
+&gt;&gt;&gt; d
+{}
+&gt;&gt;&gt; with sopen() as db:
+...     &quot;x&quot; in db
+...     db
+...     db[&quot;x&quot;] = b&quot;asd&quot;
+...     db
+...     db[&quot;9dd4e461268c8034f5c8564e155c67a6&quot;] == b&quot;asd&quot;
+...     &quot;x&quot; in db
+...     db.x == b&quot;asd&quot;
+...     del db[&quot;x&quot;]
+...     &quot;x&quot; in db
+False
+{}
+{'9dd4e461268c8034f5c8564e155c67a6': b'asd'}
+True
+True
+True
+False
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Cache:
+    r&#34;&#34;&#34;
+    Dict-like persistence based on SQLAlchemy
+
+    str keys only
+
+    When len(key) not in [32, 40], key is internally hashed to a MD5 hexdigest
+
+    Usage:
+
+    &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;)
+    &gt;&gt;&gt; d[&#34;x&#34;] = 5
+    &gt;&gt;&gt; d[&#34;x&#34;]
+    5
+    &gt;&gt;&gt; for k, v in d.items():
+    ...     print(k, v)
+    9dd4e461268c8034f5c8564e155c67a6 5
+    &gt;&gt;&gt; &#34;x&#34; in d
+    True
+    &gt;&gt;&gt; len(d)
+    1
+    &gt;&gt;&gt; del d[&#34;x&#34;]
+    &gt;&gt;&gt; &#34;x&#34; in d
+    False
+    &gt;&gt;&gt; d
+    {}
+    &gt;&gt;&gt; with sopen() as db:
+    ...     &#34;x&#34; in db
+    ...     db
+    ...     db[&#34;x&#34;] = b&#34;asd&#34;
+    ...     db
+    ...     db[&#34;9dd4e461268c8034f5c8564e155c67a6&#34;] == b&#34;asd&#34;
+    ...     &#34;x&#34; in db
+    ...     db.x == b&#34;asd&#34;
+    ...     del db[&#34;x&#34;]
+    ...     &#34;x&#34; in db
+    False
+    {}
+    {&#39;9dd4e461268c8034f5c8564e155c67a6&#39;: b&#39;asd&#39;}
+    True
+    True
+    True
+    False
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        session=&#34;sqlite+pysqlite:///:memory:&#34;,
+        autopack=True,
+        ondup=&#34;overwrite&#34;,
+        deterministic_packing=False,
+        debug=False,
+    ):
+        if isinstance(session, str):
+
+            @contextmanager
+            def sessionctx():
+                engine = create_engine(url=session, echo=debug)
+                Base.metadata.create_all(engine)
+                session_ = Session(engine, autoflush=False)
+                yield session_
+                session_.close()
+
+        else:
+
+            @contextmanager
+            def sessionctx():
+                yield session
+
+        self.sessionctx = sessionctx
+        self.autopack = autopack
+        self.ondup = ondup
+        self.deterministic_packing = deterministic_packing
+
+    def __contains__(self, key):
+        key = check(key)
+        with self.sessionctx() as session:
+            return session.query(Content).filter_by(id=key).first() is not None
+
+    def __iter__(self):
+        with self.sessionctx() as session:
+            return (c.id for c in session.query(Content).all())
+
+    def __setitem__(self, key: str, value, packing=True):
+        key = check(key)
+        if self.autopack and packing:
+            value = pack(value, ensure_determinism=self.deterministic_packing)
+        elif isinstance(value, str):
+            value = value.encode()
+        with self.sessionctx() as session:
+            if self.ondup == &#34;overwrite&#34;:
+                session.query(Content).filter_by(id=key).delete()
+            if self.ondup == &#34;stop&#34; or session.query(Content).filter_by(id=key).first() is None:
+                content = Content(id=key, blob=value)
+                session.add(content)
+            session.commit()
+
+    def update(self, dic, packing=True):
+        with self.sessionctx() as session:
+            for k, v in dic.items():
+                k = check(k)
+                if self.autopack and packing:
+                    v = pack(v, ensure_determinism=self.deterministic_packing)
+                elif isinstance(v, str):
+                    v = v.encode()
+
+                if self.ondup == &#34;overwrite&#34;:
+                    session.query(Content).filter_by(id=k).delete()
+                if self.ondup == &#34;stop&#34; or session.query(Content).filter_by(id=k).first() is None:
+                    content = Content(id=k, blob=v)
+                    session.add(content)
+
+            session.commit()
+
+    def __getitem__(self, key, packing=True):
+        key = check(key)
+        with self.sessionctx() as session:
+            if ret := session.query(Content).get(key):
+                if ret is not None:
+                    ret = ret.blob
+                    if self.autopack and packing:
+                        ret = unpack(ret)
+        return ret
+
+    def __delitem__(self, key):
+        key = check(key)
+        with self.sessionctx() as session:
+            session.query(Content).filter_by(id=key).delete()
+            session.commit()
+
+    def __getattr__(self, key):
+        key_ = check(key)
+        if key_ in self:
+            return self[key_]
+        return self.__getattribute__(key)
+
+    def __len__(self):
+        with self.sessionctx() as session:
+            return session.query(Content).count()
+
+    def __repr__(self):
+        return repr(self.asdict)
+
+    def __str__(self):
+        return repr(self)
+
+    @property
+    def asdict(self):
+        return {k: self[k] for k in self}
+
+    def copy(self):
+        raise NotImplementedError
+
+    def keys(self):
+        return iter(self)
+
+    def items(self):
+        for k in self.keys():
+            yield k, self[k]</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="shelchemy.core.Cache.asdict"><code class="name">var <span class="ident">asdict</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def asdict(self):
+    return {k: self[k] for k in self}</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="shelchemy.core.Cache.copy"><code class="name flex">
+<span>def <span class="ident">copy</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def copy(self):
+    raise NotImplementedError</code></pre>
+</details>
+</dd>
+<dt id="shelchemy.core.Cache.items"><code class="name flex">
+<span>def <span class="ident">items</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def items(self):
+    for k in self.keys():
+        yield k, self[k]</code></pre>
+</details>
+</dd>
+<dt id="shelchemy.core.Cache.keys"><code class="name flex">
+<span>def <span class="ident">keys</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def keys(self):
+    return iter(self)</code></pre>
+</details>
+</dd>
+<dt id="shelchemy.core.Cache.update"><code class="name flex">
+<span>def <span class="ident">update</span></span>(<span>self, dic, packing=True)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def update(self, dic, packing=True):
+    with self.sessionctx() as session:
+        for k, v in dic.items():
+            k = check(k)
+            if self.autopack and packing:
+                v = pack(v, ensure_determinism=self.deterministic_packing)
+            elif isinstance(v, str):
+                v = v.encode()
+
+            if self.ondup == &#34;overwrite&#34;:
+                session.query(Content).filter_by(id=k).delete()
+            if self.ondup == &#34;stop&#34; or session.query(Content).filter_by(id=k).first() is None:
+                content = Content(id=k, blob=v)
+                session.add(content)
+
+        session.commit()</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="shelchemy.core.Content"><code class="flex name class">
+<span>class <span class="ident">Content</span></span>
+<span>(</span><span>**kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>The base class of the class hierarchy.</p>
+<p>When called, it accepts no arguments and returns a new featureless
+instance that has no instance attributes and cannot be given any.</p>
+<p>A simple constructor that allows initialization from kwargs.</p>
+<p>Sets attributes on the constructed instance using the names and
+values in <code>kwargs</code>.</p>
+<p>Only keys that are present as
+attributes of the instance's class are allowed. These could be,
+for example, any mapped columns or relationships.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Content(Base):
+    __tablename__ = &#34;content&#34;
+    id = Column(String(40), primary_key=True)
+    blob = Column(BLOB)</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>sqlalchemy.orm.decl_api.Base</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="shelchemy.core.Content.blob"><code class="name">var <span class="ident">blob</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(self, instance, owner):
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self._supports_population and self.key in dict_:
+        return dict_[self.key]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            util.raise_(
+                orm_exc.UnmappedInstanceError(instance),
+                replace_context=err,
+            )
+        return self.impl.get(state, dict_)</code></pre>
+</details>
+</dd>
+<dt id="shelchemy.core.Content.id"><code class="name">var <span class="ident">id</span></code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def __get__(self, instance, owner):
+    if instance is None:
+        return self
+
+    dict_ = instance_dict(instance)
+    if self._supports_population and self.key in dict_:
+        return dict_[self.key]
+    else:
+        try:
+            state = instance_state(instance)
+        except AttributeError as err:
+            util.raise_(
+                orm_exc.UnmappedInstanceError(instance),
+                replace_context=err,
+            )
+        return self.impl.get(state, dict_)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="shelchemy.core.WrongKeyType"><code class="flex name class">
+<span>class <span class="ident">WrongKeyType</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Common base class for all non-exit exceptions.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class WrongKeyType(Exception):
+    pass</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="shelchemy" href="index.html">shelchemy</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="shelchemy.core.check" href="#shelchemy.core.check">check</a></code></li>
+<li><code><a title="shelchemy.core.sopen" href="#shelchemy.core.sopen">sopen</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="shelchemy.core.Cache" href="#shelchemy.core.Cache">Cache</a></code></h4>
+<ul class="">
+<li><code><a title="shelchemy.core.Cache.asdict" href="#shelchemy.core.Cache.asdict">asdict</a></code></li>
+<li><code><a title="shelchemy.core.Cache.copy" href="#shelchemy.core.Cache.copy">copy</a></code></li>
+<li><code><a title="shelchemy.core.Cache.items" href="#shelchemy.core.Cache.items">items</a></code></li>
+<li><code><a title="shelchemy.core.Cache.keys" href="#shelchemy.core.Cache.keys">keys</a></code></li>
+<li><code><a title="shelchemy.core.Cache.update" href="#shelchemy.core.Cache.update">update</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="shelchemy.core.Content" href="#shelchemy.core.Content">Content</a></code></h4>
+<ul class="">
+<li><code><a title="shelchemy.core.Content.blob" href="#shelchemy.core.Content.blob">blob</a></code></li>
+<li><code><a title="shelchemy.core.Content.id" href="#shelchemy.core.Content.id">id</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="shelchemy.core.WrongKeyType" href="#shelchemy.core.WrongKeyType">WrongKeyType</a></code></h4>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

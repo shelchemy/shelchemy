@@ -23,6 +23,7 @@ from contextlib import contextmanager
 from hashlib import md5
 from typing import TypeVar
 
+from lazydf.compression import pack, unpack
 from sqlalchemy import BLOB, Column, String, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
@@ -45,14 +46,16 @@ def check(key):
 
 
 @contextmanager
-def sopen(url="sqlite+pysqlite:///:memory:", autopack=True, ondup="overwrite", deterministic_packing=False, debug=False):
+def sopen(
+    url="sqlite+pysqlite:///:memory:", autopack=True, ondup="overwrite", deterministic_packing=False, debug=False
+):
     engine = create_engine(url, echo=debug)
     Base.metadata.create_all(engine)
     with Session(engine, autoflush=False) as session:
-        yield ShSQLA(session, autopack, ondup, deterministic_packing)
+        yield Cache(session, autopack, ondup, deterministic_packing)
 
 
-class ShSQLA:
+class Cache:
     r"""
     Dict-like persistence based on SQLAlchemy
 
@@ -62,7 +65,7 @@ class ShSQLA:
 
     Usage:
 
-    >>> d = ShSQLA("sqlite+pysqlite:////tmp/sqla-test.db")
+    >>> d = Cache("sqlite+pysqlite:////tmp/sqla-test.db")
     >>> d["x"] = 5
     >>> d["x"]
     5
@@ -98,12 +101,12 @@ class ShSQLA:
     """
 
     def __init__(
-            self,
-            session="sqlite+pysqlite:///:memory:",
-            autopack=True,
-            ondup="overwrite",
-            deterministic_packing=False,
-            debug=False,
+        self,
+        session="sqlite+pysqlite:///:memory:",
+        autopack=True,
+        ondup="overwrite",
+        deterministic_packing=False,
+        debug=False,
     ):
         if isinstance(session, str):
 
