@@ -27,7 +27,7 @@ from functools import partial
 from random import random
 from threading import Thread
 
-from idict.persistence.shelchemy import sopen
+from shelchemy.cache import sopen
 from temporenc import packb, unpackb
 from time import sleep
 
@@ -103,9 +103,11 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     elif isinstance(dict__url, str):
         ctx = partial(sopen, dict__url, autopack=False)
     elif isinstance(dict__url, dict) and hasattr(dict__url, "__contains__"):
+
         @contextmanager
         def ctx():
             yield dict__url
+
     else:
         ctx = dict__url
 
@@ -114,12 +116,12 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
             while True:
                 if item in dic:
                     val = dic[item]
-                    if val == b'd':
-                        status, action = 'already done', "skipping"
+                    if val == b"d":
+                        status, action = "already done", "skipping"
                     elif not alive(val, timeout):
                         status, action = "expired", "restarted"
                     else:
-                        status, action = 'already started', "skipping"
+                        status, action = "already started", "skipping"
                 else:
                     status, action = "is new", "started"
 
@@ -145,6 +147,6 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
             stop[0] = True
             t.join()
             with ctx() as dic:
-                dic[item] = b'd'
+                dic[item] = b"d"
             if logstep is not None and c % logstep == 0:
                 print(f"'{item}' done")

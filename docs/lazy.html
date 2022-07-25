@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>shelchemy API documentation</title>
+<title>shelchemy.lazy API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,36 +19,108 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Package <code>shelchemy</code></h1>
+<h1 class="title">Module <code>shelchemy.lazy</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">from .cache import Cache as Cache</code></pre>
+<pre><code class="python">#  Copyright (c) 2022. Davi Pereira dos Santos
+#  This file is part of the shelchemy project.
+#  Please respect the license - more about this in the section (*) below.
+#
+#  shelchemy is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  shelchemy is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with shelchemy.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+#
+#  (*) Removing authorship by any means, e.g. by distribution of derived
+#  works or verbatim, obfuscated, compiled or rewritten versions of any
+#  part of this work is illegal and it is unethical regarding the effort and
+#  time spent here.
+#
+
+
+def ichunks(items, binsize):
+    consumed = [0]
+    sent = [0]
+    it = iter(items)
+
+    def g():
+        c = 0
+        while c &lt; binsize:
+            try:
+                val = next(it)
+            except StopIteration:
+                # noinspection PyTypeChecker
+                consumed[0] = None
+                return
+            consumed[0] += 1
+            yield val
+            c += 1
+
+    while True:
+        yield g()
+        if consumed[0] is None:
+            return
+        sent[0] += binsize
+        if consumed[0] &lt; sent[0]:
+            raise Exception(&#34;Cannot traverse a chunk before the previous one is consumed.&#34;, consumed[0], sent[0])</code></pre>
 </details>
 </section>
 <section>
-<h2 class="section-title" id="header-submodules">Sub-modules</h2>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt><code class="name"><a title="shelchemy.cache" href="cache.html">shelchemy.cache</a></code></dt>
+<dt id="shelchemy.lazy.ichunks"><code class="name flex">
+<span>def <span class="ident">ichunks</span></span>(<span>items, binsize)</span>
+</code></dt>
 <dd>
 <div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="shelchemy.lazy" href="lazy.html">shelchemy.lazy</a></code></dt>
-<dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="shelchemy.locker" href="locker.html">shelchemy.locker</a></code></dt>
-<dd>
-<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ichunks(items, binsize):
+    consumed = [0]
+    sent = [0]
+    it = iter(items)
+
+    def g():
+        c = 0
+        while c &lt; binsize:
+            try:
+                val = next(it)
+            except StopIteration:
+                # noinspection PyTypeChecker
+                consumed[0] = None
+                return
+            consumed[0] += 1
+            yield val
+            c += 1
+
+    while True:
+        yield g()
+        if consumed[0] is None:
+            return
+        sent[0] += binsize
+        if consumed[0] &lt; sent[0]:
+            raise Exception(&#34;Cannot traverse a chunk before the previous one is consumed.&#34;, consumed[0], sent[0])</code></pre>
+</details>
 </dd>
 </dl>
-</section>
-<section>
-</section>
-<section>
 </section>
 <section>
 </section>
@@ -59,11 +131,14 @@
 <ul></ul>
 </div>
 <ul id="index">
-<li><h3><a href="#header-submodules">Sub-modules</a></h3>
+<li><h3>Super-module</h3>
 <ul>
-<li><code><a title="shelchemy.cache" href="cache.html">shelchemy.cache</a></code></li>
-<li><code><a title="shelchemy.lazy" href="lazy.html">shelchemy.lazy</a></code></li>
-<li><code><a title="shelchemy.locker" href="locker.html">shelchemy.locker</a></code></li>
+<li><code><a title="shelchemy" href="index.html">shelchemy</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="shelchemy.lazy.ichunks" href="#shelchemy.lazy.ichunks">ichunks</a></code></li>
 </ul>
 </li>
 </ul>

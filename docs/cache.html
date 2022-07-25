@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>shelchemy.core API documentation</title>
+<title>shelchemy.cache API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,7 +19,7 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>shelchemy.core</code></h1>
+<h1 class="title">Module <code>shelchemy.cache</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
@@ -27,35 +27,35 @@
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">#  Copyright (c) 2021. Davi Pereira dos Santos
-#  This file is part of the schelchemy project.
+#  This file is part of the shelchemy project.
 #  Please respect the license - more about this in the section (*) below.
 #
-#  schelchemy is free software: you can redistribute it and/or modify
+#  shelchemy is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  schelchemy is distributed in the hope that it will be useful,
+#  shelchemy is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with schelchemy.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+#  along with shelchemy.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
 #
 #  (*) Removing authorship by any means, e.g. by distribution of derived
 #  works or verbatim, obfuscated, compiled or rewritten versions of any
 #  part of this work is illegal and unethical regarding the effort and
 #  time spent here.
+
 from contextlib import contextmanager
 from hashlib import md5
 from typing import TypeVar
 
 from lazydf.compression import pack, unpack
-from sqlalchemy import BLOB, Column, String, create_engine
+from sqlalchemy import Column, String, create_engine, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
-
 
 VT = TypeVar(&#34;VT&#34;)
 Base = declarative_base()
@@ -64,7 +64,7 @@ Base = declarative_base()
 class Content(Base):
     __tablename__ = &#34;content&#34;
     id = Column(String(40), primary_key=True)
-    blob = Column(BLOB)
+    blob = Column(LargeBinary(length=(2 ** 32) - 1))
 
 
 def check(key):
@@ -266,7 +266,7 @@ class WrongKeyType(Exception):
 <section>
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
-<dt id="shelchemy.core.check"><code class="name flex">
+<dt id="shelchemy.cache.check"><code class="name flex">
 <span>def <span class="ident">check</span></span>(<span>key)</span>
 </code></dt>
 <dd>
@@ -281,7 +281,7 @@ class WrongKeyType(Exception):
     return md5(key.encode()).hexdigest() if len(key) not in [32, 40] else key</code></pre>
 </details>
 </dd>
-<dt id="shelchemy.core.sopen"><code class="name flex">
+<dt id="shelchemy.cache.sopen"><code class="name flex">
 <span>def <span class="ident">sopen</span></span>(<span>url='sqlite+pysqlite:///:memory:', autopack=True, ondup='overwrite', deterministic_packing=False, debug=False)</span>
 </code></dt>
 <dd>
@@ -305,7 +305,7 @@ def sopen(
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="shelchemy.core.Cache"><code class="flex name class">
+<dt id="shelchemy.cache.Cache"><code class="flex name class">
 <span>class <span class="ident">Cache</span></span>
 <span>(</span><span>session='sqlite+pysqlite:///:memory:', autopack=True, ondup='overwrite', deterministic_packing=False, debug=False)</span>
 </code></dt>
@@ -514,7 +514,7 @@ False
 </details>
 <h3>Instance variables</h3>
 <dl>
-<dt id="shelchemy.core.Cache.asdict"><code class="name">var <span class="ident">asdict</span></code></dt>
+<dt id="shelchemy.cache.Cache.asdict"><code class="name">var <span class="ident">asdict</span></code></dt>
 <dd>
 <div class="desc"></div>
 <details class="source">
@@ -529,7 +529,7 @@ def asdict(self):
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="shelchemy.core.Cache.copy"><code class="name flex">
+<dt id="shelchemy.cache.Cache.copy"><code class="name flex">
 <span>def <span class="ident">copy</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -542,7 +542,7 @@ def asdict(self):
     raise NotImplementedError</code></pre>
 </details>
 </dd>
-<dt id="shelchemy.core.Cache.items"><code class="name flex">
+<dt id="shelchemy.cache.Cache.items"><code class="name flex">
 <span>def <span class="ident">items</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -556,7 +556,7 @@ def asdict(self):
         yield k, self[k]</code></pre>
 </details>
 </dd>
-<dt id="shelchemy.core.Cache.keys"><code class="name flex">
+<dt id="shelchemy.cache.Cache.keys"><code class="name flex">
 <span>def <span class="ident">keys</span></span>(<span>self)</span>
 </code></dt>
 <dd>
@@ -569,7 +569,7 @@ def asdict(self):
     return iter(self)</code></pre>
 </details>
 </dd>
-<dt id="shelchemy.core.Cache.update"><code class="name flex">
+<dt id="shelchemy.cache.Cache.update"><code class="name flex">
 <span>def <span class="ident">update</span></span>(<span>self, dic, packing=True)</span>
 </code></dt>
 <dd>
@@ -598,7 +598,7 @@ def asdict(self):
 </dd>
 </dl>
 </dd>
-<dt id="shelchemy.core.Content"><code class="flex name class">
+<dt id="shelchemy.cache.Content"><code class="flex name class">
 <span>class <span class="ident">Content</span></span>
 <span>(</span><span>**kwargs)</span>
 </code></dt>
@@ -619,7 +619,7 @@ for example, any mapped columns or relationships.</p></div>
 <pre><code class="python">class Content(Base):
     __tablename__ = &#34;content&#34;
     id = Column(String(40), primary_key=True)
-    blob = Column(BLOB)</code></pre>
+    blob = Column(LargeBinary(length=(2 ** 32) - 1))</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -627,7 +627,7 @@ for example, any mapped columns or relationships.</p></div>
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="shelchemy.core.Content.blob"><code class="name">var <span class="ident">blob</span></code></dt>
+<dt id="shelchemy.cache.Content.blob"><code class="name">var <span class="ident">blob</span></code></dt>
 <dd>
 <div class="desc"></div>
 <details class="source">
@@ -652,7 +652,7 @@ for example, any mapped columns or relationships.</p></div>
         return self.impl.get(state, dict_)</code></pre>
 </details>
 </dd>
-<dt id="shelchemy.core.Content.id"><code class="name">var <span class="ident">id</span></code></dt>
+<dt id="shelchemy.cache.Content.id"><code class="name">var <span class="ident">id</span></code></dt>
 <dd>
 <div class="desc"></div>
 <details class="source">
@@ -679,7 +679,7 @@ for example, any mapped columns or relationships.</p></div>
 </dd>
 </dl>
 </dd>
-<dt id="shelchemy.core.WrongKeyType"><code class="flex name class">
+<dt id="shelchemy.cache.WrongKeyType"><code class="flex name class">
 <span>class <span class="ident">WrongKeyType</span></span>
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
@@ -714,31 +714,31 @@ for example, any mapped columns or relationships.</p></div>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
-<li><code><a title="shelchemy.core.check" href="#shelchemy.core.check">check</a></code></li>
-<li><code><a title="shelchemy.core.sopen" href="#shelchemy.core.sopen">sopen</a></code></li>
+<li><code><a title="shelchemy.cache.check" href="#shelchemy.cache.check">check</a></code></li>
+<li><code><a title="shelchemy.cache.sopen" href="#shelchemy.cache.sopen">sopen</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="shelchemy.core.Cache" href="#shelchemy.core.Cache">Cache</a></code></h4>
+<h4><code><a title="shelchemy.cache.Cache" href="#shelchemy.cache.Cache">Cache</a></code></h4>
 <ul class="">
-<li><code><a title="shelchemy.core.Cache.asdict" href="#shelchemy.core.Cache.asdict">asdict</a></code></li>
-<li><code><a title="shelchemy.core.Cache.copy" href="#shelchemy.core.Cache.copy">copy</a></code></li>
-<li><code><a title="shelchemy.core.Cache.items" href="#shelchemy.core.Cache.items">items</a></code></li>
-<li><code><a title="shelchemy.core.Cache.keys" href="#shelchemy.core.Cache.keys">keys</a></code></li>
-<li><code><a title="shelchemy.core.Cache.update" href="#shelchemy.core.Cache.update">update</a></code></li>
+<li><code><a title="shelchemy.cache.Cache.asdict" href="#shelchemy.cache.Cache.asdict">asdict</a></code></li>
+<li><code><a title="shelchemy.cache.Cache.copy" href="#shelchemy.cache.Cache.copy">copy</a></code></li>
+<li><code><a title="shelchemy.cache.Cache.items" href="#shelchemy.cache.Cache.items">items</a></code></li>
+<li><code><a title="shelchemy.cache.Cache.keys" href="#shelchemy.cache.Cache.keys">keys</a></code></li>
+<li><code><a title="shelchemy.cache.Cache.update" href="#shelchemy.cache.Cache.update">update</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="shelchemy.core.Content" href="#shelchemy.core.Content">Content</a></code></h4>
+<h4><code><a title="shelchemy.cache.Content" href="#shelchemy.cache.Content">Content</a></code></h4>
 <ul class="">
-<li><code><a title="shelchemy.core.Content.blob" href="#shelchemy.core.Content.blob">blob</a></code></li>
-<li><code><a title="shelchemy.core.Content.id" href="#shelchemy.core.Content.id">id</a></code></li>
+<li><code><a title="shelchemy.cache.Content.blob" href="#shelchemy.cache.Content.blob">blob</a></code></li>
+<li><code><a title="shelchemy.cache.Content.id" href="#shelchemy.cache.Content.id">id</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="shelchemy.core.WrongKeyType" href="#shelchemy.core.WrongKeyType">WrongKeyType</a></code></h4>
+<h4><code><a title="shelchemy.cache.WrongKeyType" href="#shelchemy.cache.WrongKeyType">WrongKeyType</a></code></h4>
 </li>
 </ul>
 </li>

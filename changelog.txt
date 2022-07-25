@@ -1,1 +1,2 @@
+Migrate more functionalities from 'idict' package
 Move shelchemy from idict

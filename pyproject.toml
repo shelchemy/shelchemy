@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "shelchemy"
-version = "0.220724.1"
-description = "Shelve-like dict using sqlachemy as backend"
+version = "0.220725.1"
+description = "Shelve-like dict using sqlachemy as backend, and lazy scheduler for resuming tasks"
 authors = ["davips <dpsabc@gmail.com>"]
 license = "GPL"
 readme = 'README.md'
@@ -12,6 +12,7 @@ packages = [
 [tool.poetry.dependencies]
 python = "^3.8"
 SQLAlchemy = "^1.4.39"
+temporenc = "^0.1.0"
 
 [tool.poetry.dev-dependencies]
 autoreadme = "^0.2102.20"

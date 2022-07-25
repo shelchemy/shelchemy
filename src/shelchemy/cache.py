@@ -24,11 +24,10 @@ from contextlib import contextmanager
 from hashlib import md5
 from typing import TypeVar
 
+from lazydf.compression import pack, unpack
 from sqlalchemy import Column, String, create_engine, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
-
-from lazydf.compression import pack, unpack
 
 VT = TypeVar("VT")
 Base = declarative_base()
@@ -37,7 +36,7 @@ Base = declarative_base()
 class Content(Base):
     __tablename__ = "content"
     id = Column(String(40), primary_key=True)
-    blob = Column(LargeBinary(length=(2**32)-1))
+    blob = Column(LargeBinary(length=(2 ** 32) - 1))
 
 
 def check(key):

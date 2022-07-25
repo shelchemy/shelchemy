@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>shelchemy.locker API documentation</title>
+<meta name="description" content="" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>shelchemy.locker</code></h1>
+</header>
+<section id="section-intro">
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">#  Copyright (c) 2021. Davi Pereira dos Santos
+#  This file is part of the shelchemy project.
+#  Please respect the license - more about this in the section (*) below.
+#
+#  shelchemy is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  shelchemy is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with shelchemy.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+#
+#  (*) Removing authorship by any means, e.g. by distribution of derived
+#  works or verbatim, obfuscated, compiled or rewritten versions of any
+#  part of this work is illegal and unethical regarding the effort and
+#  time spent here.
+
+import shelve
+from contextlib import contextmanager
+from datetime import datetime, timedelta
+from functools import partial
+from random import random
+from threading import Thread
+
+from shelchemy.cache import sopen
+from temporenc import packb, unpackb
+from time import sleep
+
+
+def ping(ctx, item, timeout, stop):
+    with ctx() as dic:
+        while not stop[0]:
+            t = timeout / 2
+            if t is None or t == 0:
+                break
+            while not stop[0] and t &gt; 0:
+                sleep(min(0.2, t))
+                t -= 0.2
+            dic[item] = packb(datetime.now())
+
+
+def alive(val, timeout):
+    return timeout is not None and datetime.now() &lt; unpackb(val).datetime() + timedelta(seconds=timeout)
+
+
+def locker(iterable, dict__url=None, timeout=None, logstep=1):
+    &#34;&#34;&#34;
+    Generator that skips items from &#39;iterable&#39; already processed before or still being processed
+
+    Item processing is restarted if &#39;timeout&#39; expires.
+    &#39;dict_shelf&#39; is a dict-like object or a sqlalchemy url to store and query each item status
+    &#39;logstep&#39; is the frequency of printed messages, &#39;None&#39; means &#39;no logs&#39;.
+    &#39;timeout&#39;=None keeps the job status as &#39;started&#39; forever (or until it finishes)
+
+    # TODO: improve avoidance of race condition adopting a pre-started state
+
+    &gt;&gt;&gt; from time import sleep
+    &gt;&gt;&gt; names = [&#34;a&#34;,&#34;b&#34;,&#34;c&#34;,&#34;d&#34;,&#34;e&#34;]
+    &gt;&gt;&gt; storage = {}
+    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):
+    ...    print(f&#34;Processing {name}&#34;)
+    ...    sleep(0.1)
+    ...    print(f&#34;{name} processed!&#34;)
+    &#39;a&#39; is new, started
+    Processing a
+    a processed!
+    &#39;a&#39; done
+    &#39;b&#39; is new, started
+    Processing b
+    b processed!
+    &#39;b&#39; done
+    &#39;c&#39; is new, started
+    Processing c
+    c processed!
+    &#39;c&#39; done
+    &#39;d&#39; is new, started
+    Processing d
+    d processed!
+    &#39;d&#39; done
+    &#39;e&#39; is new, started
+    Processing e
+    e processed!
+    &#39;e&#39; done
+    &gt;&gt;&gt; storage
+    {&#39;a&#39;: b&#39;d&#39;, &#39;b&#39;: b&#39;d&#39;, &#39;c&#39;: b&#39;d&#39;, &#39;d&#39;: b&#39;d&#39;, &#39;e&#39;: b&#39;d&#39;}
+    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=1):
+    ...    print(f&#34;Processing {name}&#34;)
+    ...    sleep(0.1)
+    ...    print(f&#34;{name} processed!&#34;)
+    &#39;a&#39; already done, skipping
+    &#39;b&#39; already done, skipping
+    &#39;c&#39; already done, skipping
+    &#39;d&#39; already done, skipping
+    &#39;e&#39; already done, skipping
+    &#34;&#34;&#34;
+    if dict__url is None:
+        ctx = partial(shelve.open, &#34;/tmp/locker.db&#34;)
+    elif isinstance(dict__url, str):
+        ctx = partial(sopen, dict__url, autopack=False)
+    elif isinstance(dict__url, dict) and hasattr(dict__url, &#34;__contains__&#34;):
+
+        @contextmanager
+        def ctx():
+            yield dict__url
+
+    else:
+        ctx = dict__url
+
+    for c, item in enumerate(iterable):
+        with ctx() as dic:
+            while True:
+                if item in dic:
+                    val = dic[item]
+                    if val == b&#34;d&#34;:
+                        status, action = &#34;already done&#34;, &#34;skipping&#34;
+                    elif not alive(val, timeout):
+                        status, action = &#34;expired&#34;, &#34;restarted&#34;
+                    else:
+                        status, action = &#34;already started&#34;, &#34;skipping&#34;
+                else:
+                    status, action = &#34;is new&#34;, &#34;started&#34;
+
+                if action == &#34;skipping&#34;:
+                    break
+                else:
+                    # Check for race condition.
+                    now = packb(datetime.now())
+                    sleep((random() + 1) / 1000)  # ~1ms
+                    if item not in dic or not alive(dic[item], timeout):
+                        break
+
+        if logstep is not None and c % logstep == 0:
+            print(f&#34;&#39;{item}&#39; {status}, {action}&#34;)
+        if action != &#34;skipping&#34;:
+            with ctx() as dic:
+                # Mark as started, as early as possible.
+                dic[item] = now
+            stop = [False]
+            t = Thread(target=ping, args=(ctx, item, timeout, stop), daemon=True)
+            t.start()
+            yield item
+            stop[0] = True
+            t.join()
+            with ctx() as dic:
+                dic[item] = b&#34;d&#34;
+            if logstep is not None and c % logstep == 0:
+                print(f&#34;&#39;{item}&#39; done&#34;)</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-functions">Functions</h2>
+<dl>
+<dt id="shelchemy.locker.alive"><code class="name flex">
+<span>def <span class="ident">alive</span></span>(<span>val, timeout)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def alive(val, timeout):
+    return timeout is not None and datetime.now() &lt; unpackb(val).datetime() + timedelta(seconds=timeout)</code></pre>
+</details>
+</dd>
+<dt id="shelchemy.locker.locker"><code class="name flex">
+<span>def <span class="ident">locker</span></span>(<span>iterable, dict__url=None, timeout=None, logstep=1)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Generator that skips items from 'iterable' already processed before or still being processed</p>
+<p>Item processing is restarted if 'timeout' expires.
+'dict_shelf' is a dict-like object or a sqlalchemy url to store and query each item status
+'logstep' is the frequency of printed messages, 'None' means 'no logs'.
+'timeout'=None keeps the job status as 'started' forever (or until it finishes)</p>
+<h1 id="todo-improve-avoidance-of-race-condition-adopting-a-pre-started-state">TODO: improve avoidance of race condition adopting a pre-started state</h1>
+<pre><code class="language-python-repl">&gt;&gt;&gt; from time import sleep
+&gt;&gt;&gt; names = [&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;d&quot;,&quot;e&quot;]
+&gt;&gt;&gt; storage = {}
+&gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):
+...    print(f&quot;Processing {name}&quot;)
+...    sleep(0.1)
+...    print(f&quot;{name} processed!&quot;)
+'a' is new, started
+Processing a
+a processed!
+'a' done
+'b' is new, started
+Processing b
+b processed!
+'b' done
+'c' is new, started
+Processing c
+c processed!
+'c' done
+'d' is new, started
+Processing d
+d processed!
+'d' done
+'e' is new, started
+Processing e
+e processed!
+'e' done
+&gt;&gt;&gt; storage
+{'a': b'd', 'b': b'd', 'c': b'd', 'd': b'd', 'e': b'd'}
+&gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=1):
+...    print(f&quot;Processing {name}&quot;)
+...    sleep(0.1)
+...    print(f&quot;{name} processed!&quot;)
+'a' already done, skipping
+'b' already done, skipping
+'c' already done, skipping
+'d' already done, skipping
+'e' already done, skipping
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def locker(iterable, dict__url=None, timeout=None, logstep=1):
+    &#34;&#34;&#34;
+    Generator that skips items from &#39;iterable&#39; already processed before or still being processed
+
+    Item processing is restarted if &#39;timeout&#39; expires.
+    &#39;dict_shelf&#39; is a dict-like object or a sqlalchemy url to store and query each item status
+    &#39;logstep&#39; is the frequency of printed messages, &#39;None&#39; means &#39;no logs&#39;.
+    &#39;timeout&#39;=None keeps the job status as &#39;started&#39; forever (or until it finishes)
+
+    # TODO: improve avoidance of race condition adopting a pre-started state
+
+    &gt;&gt;&gt; from time import sleep
+    &gt;&gt;&gt; names = [&#34;a&#34;,&#34;b&#34;,&#34;c&#34;,&#34;d&#34;,&#34;e&#34;]
+    &gt;&gt;&gt; storage = {}
+    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):
+    ...    print(f&#34;Processing {name}&#34;)
+    ...    sleep(0.1)
+    ...    print(f&#34;{name} processed!&#34;)
+    &#39;a&#39; is new, started
+    Processing a
+    a processed!
+    &#39;a&#39; done
+    &#39;b&#39; is new, started
+    Processing b
+    b processed!
+    &#39;b&#39; done
+    &#39;c&#39; is new, started
+    Processing c
+    c processed!
+    &#39;c&#39; done
+    &#39;d&#39; is new, started
+    Processing d
+    d processed!
+    &#39;d&#39; done
+    &#39;e&#39; is new, started
+    Processing e
+    e processed!
+    &#39;e&#39; done
+    &gt;&gt;&gt; storage
+    {&#39;a&#39;: b&#39;d&#39;, &#39;b&#39;: b&#39;d&#39;, &#39;c&#39;: b&#39;d&#39;, &#39;d&#39;: b&#39;d&#39;, &#39;e&#39;: b&#39;d&#39;}
+    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=1):
+    ...    print(f&#34;Processing {name}&#34;)
+    ...    sleep(0.1)
+    ...    print(f&#34;{name} processed!&#34;)
+    &#39;a&#39; already done, skipping
+    &#39;b&#39; already done, skipping
+    &#39;c&#39; already done, skipping
+    &#39;d&#39; already done, skipping
+    &#39;e&#39; already done, skipping
+    &#34;&#34;&#34;
+    if dict__url is None:
+        ctx = partial(shelve.open, &#34;/tmp/locker.db&#34;)
+    elif isinstance(dict__url, str):
+        ctx = partial(sopen, dict__url, autopack=False)
+    elif isinstance(dict__url, dict) and hasattr(dict__url, &#34;__contains__&#34;):
+
+        @contextmanager
+        def ctx():
+            yield dict__url
+
+    else:
+        ctx = dict__url
+
+    for c, item in enumerate(iterable):
+        with ctx() as dic:
+            while True:
+                if item in dic:
+                    val = dic[item]
+                    if val == b&#34;d&#34;:
+                        status, action = &#34;already done&#34;, &#34;skipping&#34;
+                    elif not alive(val, timeout):
+                        status, action = &#34;expired&#34;, &#34;restarted&#34;
+                    else:
+                        status, action = &#34;already started&#34;, &#34;skipping&#34;
+                else:
+                    status, action = &#34;is new&#34;, &#34;started&#34;
+
+                if action == &#34;skipping&#34;:
+                    break
+                else:
+                    # Check for race condition.
+                    now = packb(datetime.now())
+                    sleep((random() + 1) / 1000)  # ~1ms
+                    if item not in dic or not alive(dic[item], timeout):
+                        break
+
+        if logstep is not None and c % logstep == 0:
+            print(f&#34;&#39;{item}&#39; {status}, {action}&#34;)
+        if action != &#34;skipping&#34;:
+            with ctx() as dic:
+                # Mark as started, as early as possible.
+                dic[item] = now
+            stop = [False]
+            t = Thread(target=ping, args=(ctx, item, timeout, stop), daemon=True)
+            t.start()
+            yield item
+            stop[0] = True
+            t.join()
+            with ctx() as dic:
+                dic[item] = b&#34;d&#34;
+            if logstep is not None and c % logstep == 0:
+                print(f&#34;&#39;{item}&#39; done&#34;)</code></pre>
+</details>
+</dd>
+<dt id="shelchemy.locker.ping"><code class="name flex">
+<span>def <span class="ident">ping</span></span>(<span>ctx, item, timeout, stop)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ping(ctx, item, timeout, stop):
+    with ctx() as dic:
+        while not stop[0]:
+            t = timeout / 2
+            if t is None or t == 0:
+                break
+            while not stop[0] and t &gt; 0:
+                sleep(min(0.2, t))
+                t -= 0.2
+            dic[item] = packb(datetime.now())</code></pre>
+</details>
+</dd>
+<dt id="shelchemy.locker.random"><code class="name flex">
+<span>def <span class="ident">random</span></span>(<span>)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>random() -&gt; x in the interval [0, 1).</p></div>
+</dd>
+</dl>
+</section>
+<section>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="shelchemy" href="index.html">shelchemy</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-functions">Functions</a></h3>
+<ul class="">
+<li><code><a title="shelchemy.locker.alive" href="#shelchemy.locker.alive">alive</a></code></li>
+<li><code><a title="shelchemy.locker.locker" href="#shelchemy.locker.locker">locker</a></code></li>
+<li><code><a title="shelchemy.locker.ping" href="#shelchemy.locker.ping">ping</a></code></li>
+<li><code><a title="shelchemy.locker.random" href="#shelchemy.locker.random">random</a></code></li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>
