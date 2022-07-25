@@ -1,33 +1,34 @@
 #  Copyright (c) 2021. Davi Pereira dos Santos
-#  This file is part of the schelchemy project.
+#  This file is part of the shelchemy project.
 #  Please respect the license - more about this in the section (*) below.
 #
-#  schelchemy is free software: you can redistribute it and/or modify
+#  shelchemy is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  schelchemy is distributed in the hope that it will be useful,
+#  shelchemy is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with schelchemy.  If not, see <http://www.gnu.org/licenses/>.
+#  along with shelchemy.  If not, see <http://www.gnu.org/licenses/>.
 #
 #  (*) Removing authorship by any means, e.g. by distribution of derived
 #  works or verbatim, obfuscated, compiled or rewritten versions of any
 #  part of this work is illegal and unethical regarding the effort and
 #  time spent here.
+
 from contextlib import contextmanager
 from hashlib import md5
 from typing import TypeVar
 
-from lazydf.compression import pack, unpack
-from sqlalchemy import BLOB, Column, String, create_engine
+from sqlalchemy import Column, String, create_engine, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 
+from lazydf.compression import pack, unpack
 
 VT = TypeVar("VT")
 Base = declarative_base()
@@ -36,7 +37,7 @@ Base = declarative_base()
 class Content(Base):
     __tablename__ = "content"
     id = Column(String(40), primary_key=True)
-    blob = Column(BLOB)
+    blob = Column(LargeBinary(length=(2**32)-1))
 
 
 def check(key):
