@@ -1,15 +1,15 @@
-![test](https://github.com/schelchemy/schelchemy/workflows/test/badge.svg)
-[![codecov](https://codecov.io/gh/schelchemy/schelchemy/branch/main/graph/badge.svg)](https://codecov.io/gh/schelchemy/schelchemy)
-<a href="https://pypi.org/project/schelchemy">
-<img src="https://img.shields.io/github/v/release/schelchemy/schelchemy?display_name=tag&sort=semver&color=blue" alt="github">
+![test](https://github.com/shelchemy/shelchemy/workflows/test/badge.svg)
+[![codecov](https://codecov.io/gh/shelchemy/shelchemy/branch/main/graph/badge.svg)](https://codecov.io/gh/shelchemy/shelchemy)
+<a href="https://pypi.org/project/shelchemy">
+<img src="https://img.shields.io/github/v/release/shelchemy/shelchemy?display_name=tag&sort=semver&color=blue" alt="github">
 </a>
 ![Python version](https://img.shields.io/badge/python-3.8%20%7C%203.9-blue.svg)
 [![license: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-[![API documentation](https://img.shields.io/badge/doc-API%20%28auto%29-a0a0a0.svg)](https://schelchemy.github.io/schelchemy)
+[![API documentation](https://img.shields.io/badge/doc-API%20%28auto%29-a0a0a0.svg)](https://shelchemy.github.io/shelchemy)
 
 
-# schelchemy - Dict-like (shelve-like) storage wrapper for any DBMS (SQLAlchemy)
+# shelchemy - Dict-like (shelve-like) storage wrapper for any DBMS (SQLAlchemy)
  
 
 
@@ -21,13 +21,13 @@ python3 -m venv venv
 source venv/bin/activate
 
 # Install from PyPI
-pip install schelchemy
+pip install shelchemy
 ```
 
 ### from source
 ```bash
-git clone https://github.com/schelchemy/schelchemy
-cd schelchemy
+git clone https://github.com/shelchemy/shelchemy
+cd shelchemy
 poetry install
 ```
 
