@@ -1,12 +1,12 @@
-![test](https://github.com/davips/schelchemy/workflows/test/badge.svg)
-[![codecov](https://codecov.io/gh/davips/schelchemy/branch/main/graph/badge.svg)](https://codecov.io/gh/davips/schelchemy)
+![test](https://github.com/schelchemy/schelchemy/workflows/test/badge.svg)
+[![codecov](https://codecov.io/gh/schelchemy/schelchemy/branch/main/graph/badge.svg)](https://codecov.io/gh/schelchemy/schelchemy)
 <a href="https://pypi.org/project/schelchemy">
 <img src="https://img.shields.io/pypi/v/schelchemy.svg?label=release&color=blue&style=flat-square" alt="pypi">
 </a>
 ![Python version](https://img.shields.io/badge/python-3.8%20%7C%203.9-blue.svg)
 [![license: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-[![API documentation](https://img.shields.io/badge/doc-API%20%28auto%29-a0a0a0.svg)](https://davips.github.io/schelchemy)
+[![API documentation](https://img.shields.io/badge/doc-API%20%28auto%29-a0a0a0.svg)](https://schelchemy.github.io/schelchemy)
 
 
 # schelchemy - Dict-like (shelve-like) storage wrapper for any DBMS (SQLAlchemy)
@@ -26,7 +26,7 @@ pip install schelchemy
 
 ### from source
 ```bash
-git clone https://github.com/davips/schelchemy
+git clone https://github.com/schelchemy/schelchemy
 cd schelchemy
 poetry install
 ```
