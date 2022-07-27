@@ -8,7 +8,7 @@ echo; echo
 echo
 echo "----------------- testing... -----------------------"
 read -p "press enter"
-poetry run pytest src tests --cov=src --doctest-modules
+poetry run pytest src tests --cov=src --doctest-modules  --cov-report term-missing
 echo "----------------- tested -----------------------"
 echo; echo
 
