@@ -13,7 +13,6 @@ packages = [
 python = "^3.10,<4.0"
 SQLAlchemy = "^1.4.39"
 temporenc = "^0.1.0"
-lz4 = "^4.0.2"
 
 [tool.poetry.dev-dependencies]
 autoreadme = "^0.2102.20"
@@ -29,6 +28,7 @@ pandas = "1.4.0"
 ipython = "^8.0.1"
 click = "8.0.4"
 lazydf = "^0.220725.1"
+lz4 = "^4.0.2"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
