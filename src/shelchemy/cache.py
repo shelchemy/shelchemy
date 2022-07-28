@@ -143,7 +143,9 @@ class Cache:
             try:
                 from lazydf.compression import pack
             except ModuleNotFoundError:
-                raise Exception("You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy.")
+                raise Exception(
+                    "You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy."
+                )
             value = pack(value, ensure_determinism=self.deterministic_packing)
         elif isinstance(value, str):
             value = value.encode()
@@ -163,7 +165,9 @@ class Cache:
                     try:
                         from lazydf.compression import pack
                     except ModuleNotFoundError:
-                        raise Exception("You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy.")
+                        raise Exception(
+                            "You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy."
+                        )
                     v = pack(v, ensure_determinism=self.deterministic_packing)
                 elif isinstance(v, str):
                     v = v.encode()
@@ -186,7 +190,9 @@ class Cache:
                         try:
                             from lazydf.compression import unpack
                         except ModuleNotFoundError:
-                            raise Exception("You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy.")
+                            raise Exception(
+                                "You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy."
+                            )
                         ret = unpack(ret)
         return ret
 
