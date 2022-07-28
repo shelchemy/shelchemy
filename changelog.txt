@@ -1,3 +1,1 @@
-Fix py ver to 3.10
-Migrate more functionalities from 'idict' package
-Move shelchemy from idict
+Update dev/optional deps
