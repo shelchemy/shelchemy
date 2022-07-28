@@ -24,7 +24,6 @@ from contextlib import contextmanager
 from hashlib import md5
 from typing import TypeVar
 
-from lazydf.compression import pack, unpack
 from sqlalchemy import Column, String, create_engine, LargeBinary
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
@@ -141,6 +140,10 @@ class Cache:
     def __setitem__(self, key: str, value, packing=True):
         key = check(key)
         if self.autopack and packing:
+            try:
+                from lazydf.compression import pack
+            except ModuleNotFoundError:
+                raise Exception("You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy.")
             value = pack(value, ensure_determinism=self.deterministic_packing)
         elif isinstance(value, str):
             value = value.encode()
@@ -157,6 +160,10 @@ class Cache:
             for k, v in dic.items():
                 k = check(k)
                 if self.autopack and packing:
+                    try:
+                        from lazydf.compression import pack
+                    except ModuleNotFoundError:
+                        raise Exception("You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy.")
                     v = pack(v, ensure_determinism=self.deterministic_packing)
                 elif isinstance(v, str):
                     v = v.encode()
@@ -176,6 +183,10 @@ class Cache:
                 if ret is not None:
                     ret = ret.blob
                     if self.autopack and packing:
+                        try:
+                            from lazydf.compression import unpack
+                        except ModuleNotFoundError:
+                            raise Exception("You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy.")
                         ret = unpack(ret)
         return ret
 

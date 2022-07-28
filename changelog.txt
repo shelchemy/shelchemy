@@ -1,1 +1,1 @@
-Update dev/optional deps
+Add handling/warn about missing optional compression
