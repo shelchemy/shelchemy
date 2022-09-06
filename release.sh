@@ -29,7 +29,7 @@ echo
 echo "----------------- docs/black... -----------------------"
 read -p "press enter"
 rm docs -rf
-poetry run black -l120 src/ tests/
+poetry run black -l130 src/ tests/
 poetry run pdoc --html --force shelchemy -o docs
 mv docs/shelchemy/* docs/
 rm docs/shelchemy -rf

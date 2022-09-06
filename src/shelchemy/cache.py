@@ -30,12 +30,13 @@ from sqlalchemy.orm import Session
 
 VT = TypeVar("VT")
 Base = declarative_base()
+memory = "sqlite+pysqlite:///:memory:"
 
 
 class Content(Base):
     __tablename__ = "content"
     id = Column(String(40), primary_key=True)
-    blob = Column(LargeBinary(length=(2**32) - 1))
+    blob = Column(LargeBinary(length=(2 ** 32) - 1))
 
 
 def check(key):
@@ -45,13 +46,11 @@ def check(key):
 
 
 @contextmanager
-def sopen(
-    url="sqlite+pysqlite:///:memory:", autopack=True, ondup="overwrite", deterministic_packing=False, debug=False
-):
+def sopen(url=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False):
     engine = create_engine(url, echo=debug)
     Base.metadata.create_all(engine)
     with Session(engine, autoflush=False) as session:
-        yield Cache(session, autopack, ondup, deterministic_packing)
+        yield Cache(session, ondup, autopack, safepack, stablepack, debug)
 
 
 class Cache:
@@ -99,14 +98,7 @@ class Cache:
     False
     """
 
-    def __init__(
-        self,
-        session="sqlite+pysqlite:///:memory:",
-        autopack=True,
-        ondup="overwrite",
-        deterministic_packing=False,
-        debug=False,
-    ):
+    def __init__(self, session=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False):
         if isinstance(session, str):
 
             @contextmanager
@@ -124,9 +116,10 @@ class Cache:
                 yield session
 
         self.sessionctx = sessionctx
-        self.autopack = autopack
         self.ondup = ondup
-        self.deterministic_packing = deterministic_packing
+        self.autopack = autopack
+        self.safepack = safepack
+        self.stablepack = stablepack
 
     def __contains__(self, key):
         key = check(key)
@@ -146,7 +139,7 @@ class Cache:
                 raise Exception(
                     "You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy."
                 )
-            value = pack(value, ensure_determinism=self.deterministic_packing)
+            value = pack(value, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
         elif isinstance(value, str):
             value = value.encode()
         with self.sessionctx() as session:
@@ -168,7 +161,7 @@ class Cache:
                         raise Exception(
                             "You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy."
                         )
-                    v = pack(v, ensure_determinism=self.deterministic_packing)
+                    v = pack(v, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
                 elif isinstance(v, str):
                     v = v.encode()
 

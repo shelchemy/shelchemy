@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shelchemy"
-version = "0.220726.8"
+version = "0.220906.0"
 description = "Shelve-like dict using sqlachemy as backend, and lazy scheduler for resuming tasks"
 authors = ["davips <dpsabc@gmail.com>"]
 license = "GPL"
@@ -28,7 +28,7 @@ pylint = "^2.7.4"
 pandas = "^1.4.3"
 ipython = "^8.0.1"
 click = "8.0.4"
-lazydf = "^0.220725.4"
+lazydf = "^0.220726.1"
 lz4 = "^4.0.2"
 
 [build-system]

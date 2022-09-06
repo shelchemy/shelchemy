@@ -1,1 +1,1 @@
-Add handling/warn about missing optional compression
+Adopt fixed lazydf
