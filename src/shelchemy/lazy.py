@@ -22,7 +22,7 @@
 #
 
 
-def ichunks(items, binsize):
+def ichunks(items, binsize, asgenerators=True):
     consumed = [0]
     sent = [0]
     it = iter(items)
@@ -41,7 +41,7 @@ def ichunks(items, binsize):
             c += 1
 
     while True:
-        yield g()
+        yield g() if asgenerators else list(g())
         if consumed[0] is None:
             return
         sent[0] += binsize
