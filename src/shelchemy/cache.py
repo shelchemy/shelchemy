@@ -36,7 +36,7 @@ memory = "sqlite+pysqlite:///:memory:"
 class Content(Base):
     __tablename__ = "content"
     id = Column(String(40), primary_key=True)
-    blob = Column(LargeBinary(length=(2 ** 32) - 1))
+    blob = Column(LargeBinary(length=(2**32) - 1))
 
 
 def check(key):
