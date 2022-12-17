@@ -27,7 +27,6 @@ from functools import partial
 from random import random
 from threading import Thread
 
-from shelchemy.cache import sopen
 from temporenc import packb, unpackb
 from time import sleep
 
@@ -50,12 +49,12 @@ def alive(val, timeout):
 
 def locker(iterable, dict__url=None, timeout=None, logstep=1):
     """
-    Generator that skips items from 'iterable' already processed before or still being processed
+    Generator that skips already processed (or still being processed) items from 'iterable'
 
     Item processing is restarted if 'timeout' expires.
-    'dict_shelf' is a dict-like object or a sqlalchemy url to store and query each item status
+    'dict__url' is a dict-like object or a sqlalchemy url to store and query each item status
     'logstep' is the frequency of printed messages, 'None' means 'no logs'.
-    'timeout'=None keeps the job status as 'started' forever (or until it finishes)
+    'timeout'=None keeps the job status as 'started' forever if the job never finishes.
 
     # TODO: improve avoidance of race condition adopting a pre-started state
 
@@ -101,6 +100,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     if dict__url is None:
         ctx = partial(shelve.open, "/tmp/locker.db")
     elif isinstance(dict__url, str):
+        from shelchemy.cache import sopen
         ctx = partial(sopen, dict__url, autopack=False)
     elif isinstance(dict__url, dict) and hasattr(dict__url, "__contains__"):
 

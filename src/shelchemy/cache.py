@@ -22,6 +22,7 @@
 
 from contextlib import contextmanager
 from hashlib import md5
+from pickle import dumps
 from typing import TypeVar
 
 from sqlalchemy import Column, String, create_engine, LargeBinary
@@ -41,7 +42,12 @@ class Content(Base):
 
 def check(key):
     if not isinstance(key, str):
-        raise WrongKeyType(f"Key must be string, not {type(key)}.", key)
+        try:
+            dump = dumps(key, protocol=5)
+        except Exception as e:
+            print(e)
+            raise WrongKeyType(f"Key must be string or serializable (pickable), not {type(key)}.", key)
+        key = dump
     return md5(key.encode()).hexdigest() if len(key) not in [32, 40] else key
 
 
@@ -57,7 +63,7 @@ class Cache:
     r"""
     Dict-like persistence based on SQLAlchemy
 
-    str keys only
+    string or serializable (pickle) keys only
 
     When len(key) not in [32, 40], key is internally hashed to a MD5 hexdigest
 
