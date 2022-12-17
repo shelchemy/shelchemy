@@ -1,1 +1,3 @@
-Add asgenerators flag
+Add class Scheduler able to "<< iterable"
+Remove lz4 module
+Accept non-string keys
