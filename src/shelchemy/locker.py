@@ -44,7 +44,12 @@ def ping(ctx, item, timeout, stop):
 
 
 def alive(val, timeout):
-    return timeout is not None and datetime.now() < unpackb(val).datetime() + timedelta(seconds=timeout)
+    try:
+        return timeout is not None and datetime.now() < unpackb(val).datetime() + timedelta(seconds=timeout)
+    except Exception as e:
+        print(val)
+        print(unpackb(val))
+        raise e
 
 
 def locker(iterable, dict__url=None, timeout=None, logstep=1):

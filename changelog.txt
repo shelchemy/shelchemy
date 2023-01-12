@@ -1,3 +1,1 @@
-Add class Scheduler able to "<< iterable"
-Remove lz4 module
-Accept non-string keys
+Add exception log to show data after temporenc problems
