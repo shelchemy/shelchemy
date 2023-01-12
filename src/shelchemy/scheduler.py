@@ -56,6 +56,7 @@ class Scheduler:
     'd' already done, skipping
     'e' already done, skipping
     """
+
     url: str = None
     timeout: float = None
     logstep: int = 1

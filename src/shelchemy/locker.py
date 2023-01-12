@@ -106,6 +106,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
         ctx = partial(shelve.open, "/tmp/locker.db")
     elif isinstance(dict__url, str):
         from shelchemy.cache import sopen
+
         ctx = partial(sopen, dict__url, autopack=False)
     elif isinstance(dict__url, dict) and hasattr(dict__url, "__contains__"):
 

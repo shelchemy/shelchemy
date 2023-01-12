@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
 <meta name="generator" content="pdoc 0.10.0" />
-<title>shelchemy.locker API documentation</title>
+<title>shelchemy.scheduler API documentation</title>
 <meta name="description" content="" />
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
 <link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
@@ -19,82 +19,36 @@
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>shelchemy.locker</code></h1>
+<h1 class="title">Module <code>shelchemy.scheduler</code></h1>
 </header>
 <section id="section-intro">
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">#  Copyright (c) 2021. Davi Pereira dos Santos
-#  This file is part of the shelchemy project.
-#  Please respect the license - more about this in the section (*) below.
-#
-#  shelchemy is free software: you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation, either version 3 of the License, or
-#  (at your option) any later version.
-#
-#  shelchemy is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with shelchemy.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
-#
-#  (*) Removing authorship by any means, e.g. by distribution of derived
-#  works or verbatim, obfuscated, compiled or rewritten versions of any
-#  part of this work is illegal and unethical regarding the effort and
-#  time spent here.
+<pre><code class="python">from dataclasses import dataclass
 
-import shelve
-from contextlib import contextmanager
-from datetime import datetime, timedelta
-from functools import partial
-from random import random
-from threading import Thread
-
-from temporenc import packb, unpackb
-from time import sleep
+from shelchemy.locker import locker
 
 
-def ping(ctx, item, timeout, stop):
-    with ctx() as dic:
-        while not stop[0]:
-            t = timeout / 2
-            if t is None or t == 0:
-                break
-            while not stop[0] and t &gt; 0:
-                sleep(min(0.2, t))
-                t -= 0.2
-            dic[item] = packb(datetime.now())
-
-
-def alive(val, timeout):
-    try:
-        return timeout is not None and datetime.now() &lt; unpackb(val).datetime() + timedelta(seconds=timeout)
-    except Exception as e:
-        print(val)
-        print(unpackb(val))
-        raise e
-
-
-def locker(iterable, dict__url=None, timeout=None, logstep=1):
+@dataclass
+class Scheduler:
     &#34;&#34;&#34;
-    Generator that skips already processed (or still being processed) items from &#39;iterable&#39;
+    Generator that skips already processed (or still being processed) items from any lshifted (&lt;&lt;) &#39;iterable&#39;
 
     Item processing is restarted if &#39;timeout&#39; expires.
-    &#39;dict__url&#39; is a dict-like object or a sqlalchemy url to store and query each item status
+    &#39;url&#39; is a sqlalchemy url (or a dict-like object) to use internally to store and query each item status
     &#39;logstep&#39; is the frequency of printed messages, &#39;None&#39; means &#39;no logs&#39;.
     &#39;timeout&#39;=None keeps the job status as &#39;started&#39; forever if the job never finishes.
 
     # TODO: improve avoidance of race condition adopting a pre-started state
 
     &gt;&gt;&gt; from time import sleep
-    &gt;&gt;&gt; names = [&#34;a&#34;,&#34;b&#34;,&#34;c&#34;,&#34;d&#34;,&#34;e&#34;]
+    &gt;&gt;&gt; names1 = [&#34;a&#34;,&#34;b&#34;]
+    &gt;&gt;&gt; names2 = [&#34;c&#34;]
+    &gt;&gt;&gt; names3 = [&#34;d&#34;,&#34;e&#34;]
     &gt;&gt;&gt; storage = {}
-    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):
+    &gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
@@ -120,7 +74,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     &#39;e&#39; done
     &gt;&gt;&gt; storage
     {&#39;a&#39;: b&#39;d&#39;, &#39;b&#39;: b&#39;d&#39;, &#39;c&#39;: b&#39;d&#39;, &#39;d&#39;: b&#39;d&#39;, &#39;e&#39;: b&#39;d&#39;}
-    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=1):
+    &gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
@@ -130,60 +84,21 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     &#39;d&#39; already done, skipping
     &#39;e&#39; already done, skipping
     &#34;&#34;&#34;
-    if dict__url is None:
-        ctx = partial(shelve.open, &#34;/tmp/locker.db&#34;)
-    elif isinstance(dict__url, str):
-        from shelchemy.cache import sopen
 
-        ctx = partial(sopen, dict__url, autopack=False)
-    elif isinstance(dict__url, dict) and hasattr(dict__url, &#34;__contains__&#34;):
+    url: str = None
+    timeout: float = None
+    logstep: int = 1
 
-        @contextmanager
-        def ctx():
-            yield dict__url
+    def __post_init__(self):
+        self.list_of_iterators = []
 
-    else:
-        ctx = dict__url
+    def __lshift__(self, iterable):
+        self.list_of_iterators.append(iterable)
+        return self
 
-    for c, item in enumerate(iterable):
-        with ctx() as dic:
-            while True:
-                if item in dic:
-                    val = dic[item]
-                    if val == b&#34;d&#34;:
-                        status, action = &#34;already done&#34;, &#34;skipping&#34;
-                    elif not alive(val, timeout):
-                        status, action = &#34;expired&#34;, &#34;restarted&#34;
-                    else:
-                        status, action = &#34;already started&#34;, &#34;skipping&#34;
-                else:
-                    status, action = &#34;is new&#34;, &#34;started&#34;
-
-                if action == &#34;skipping&#34;:
-                    break
-                else:
-                    # Check for race condition.
-                    now = packb(datetime.now())
-                    sleep((random() + 1) / 1000)  # ~1ms
-                    if item not in dic or not alive(dic[item], timeout):
-                        break
-
-        if logstep is not None and c % logstep == 0:
-            print(f&#34;&#39;{item}&#39; {status}, {action}&#34;)
-        if action != &#34;skipping&#34;:
-            with ctx() as dic:
-                # Mark as started, as early as possible.
-                dic[item] = now
-            stop = [False]
-            t = Thread(target=ping, args=(ctx, item, timeout, stop), daemon=True)
-            t.start()
-            yield item
-            stop[0] = True
-            t.join()
-            with ctx() as dic:
-                dic[item] = b&#34;d&#34;
-            if logstep is not None and c % logstep == 0:
-                print(f&#34;&#39;{item}&#39; done&#34;)</code></pre>
+    def __iter__(self):
+        for items in self.list_of_iterators:
+            yield from locker(items, self.url, self.timeout, self.logstep)</code></pre>
 </details>
 </section>
 <section>
@@ -191,40 +106,27 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
 <section>
 </section>
 <section>
-<h2 class="section-title" id="header-functions">Functions</h2>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="shelchemy.locker.alive"><code class="name flex">
-<span>def <span class="ident">alive</span></span>(<span>val, timeout)</span>
+<dt id="shelchemy.scheduler.Scheduler"><code class="flex name class">
+<span>class <span class="ident">Scheduler</span></span>
+<span>(</span><span>url: str = None, timeout: float = None, logstep: int = 1)</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def alive(val, timeout):
-    try:
-        return timeout is not None and datetime.now() &lt; unpackb(val).datetime() + timedelta(seconds=timeout)
-    except Exception as e:
-        print(val)
-        print(unpackb(val))
-        raise e</code></pre>
-</details>
-</dd>
-<dt id="shelchemy.locker.locker"><code class="name flex">
-<span>def <span class="ident">locker</span></span>(<span>iterable, dict__url=None, timeout=None, logstep=1)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Generator that skips already processed (or still being processed) items from 'iterable'</p>
+<div class="desc"><p>Generator that skips already processed (or still being processed) items from any lshifted (&lt;&lt;) 'iterable'</p>
 <p>Item processing is restarted if 'timeout' expires.
-'dict__url' is a dict-like object or a sqlalchemy url to store and query each item status
+'url' is a sqlalchemy url (or a dict-like object) to use internally to store and query each item status
 'logstep' is the frequency of printed messages, 'None' means 'no logs'.
 'timeout'=None keeps the job status as 'started' forever if the job never finishes.</p>
 <h1 id="todo-improve-avoidance-of-race-condition-adopting-a-pre-started-state">TODO: improve avoidance of race condition adopting a pre-started state</h1>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from time import sleep
-&gt;&gt;&gt; names = [&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;d&quot;,&quot;e&quot;]
+&gt;&gt;&gt; names1 = [&quot;a&quot;,&quot;b&quot;]
+&gt;&gt;&gt; names2 = [&quot;c&quot;]
+&gt;&gt;&gt; names3 = [&quot;d&quot;,&quot;e&quot;]
 &gt;&gt;&gt; storage = {}
-&gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):
+&gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
 ...    print(f&quot;Processing {name}&quot;)
 ...    sleep(0.1)
 ...    print(f&quot;{name} processed!&quot;)
@@ -250,7 +152,7 @@ e processed!
 'e' done
 &gt;&gt;&gt; storage
 {'a': b'd', 'b': b'd', 'c': b'd', 'd': b'd', 'e': b'd'}
-&gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=1):
+&gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
 ...    print(f&quot;Processing {name}&quot;)
 ...    sleep(0.1)
 ...    print(f&quot;{name} processed!&quot;)
@@ -264,21 +166,24 @@ e processed!
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def locker(iterable, dict__url=None, timeout=None, logstep=1):
+<pre><code class="python">@dataclass
+class Scheduler:
     &#34;&#34;&#34;
-    Generator that skips already processed (or still being processed) items from &#39;iterable&#39;
+    Generator that skips already processed (or still being processed) items from any lshifted (&lt;&lt;) &#39;iterable&#39;
 
     Item processing is restarted if &#39;timeout&#39; expires.
-    &#39;dict__url&#39; is a dict-like object or a sqlalchemy url to store and query each item status
+    &#39;url&#39; is a sqlalchemy url (or a dict-like object) to use internally to store and query each item status
     &#39;logstep&#39; is the frequency of printed messages, &#39;None&#39; means &#39;no logs&#39;.
     &#39;timeout&#39;=None keeps the job status as &#39;started&#39; forever if the job never finishes.
 
     # TODO: improve avoidance of race condition adopting a pre-started state
 
     &gt;&gt;&gt; from time import sleep
-    &gt;&gt;&gt; names = [&#34;a&#34;,&#34;b&#34;,&#34;c&#34;,&#34;d&#34;,&#34;e&#34;]
+    &gt;&gt;&gt; names1 = [&#34;a&#34;,&#34;b&#34;]
+    &gt;&gt;&gt; names2 = [&#34;c&#34;]
+    &gt;&gt;&gt; names3 = [&#34;d&#34;,&#34;e&#34;]
     &gt;&gt;&gt; storage = {}
-    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):
+    &gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
@@ -304,7 +209,7 @@ e processed!
     &#39;e&#39; done
     &gt;&gt;&gt; storage
     {&#39;a&#39;: b&#39;d&#39;, &#39;b&#39;: b&#39;d&#39;, &#39;c&#39;: b&#39;d&#39;, &#39;d&#39;: b&#39;d&#39;, &#39;e&#39;: b&#39;d&#39;}
-    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=1):
+    &gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
@@ -314,92 +219,39 @@ e processed!
     &#39;d&#39; already done, skipping
     &#39;e&#39; already done, skipping
     &#34;&#34;&#34;
-    if dict__url is None:
-        ctx = partial(shelve.open, &#34;/tmp/locker.db&#34;)
-    elif isinstance(dict__url, str):
-        from shelchemy.cache import sopen
 
-        ctx = partial(sopen, dict__url, autopack=False)
-    elif isinstance(dict__url, dict) and hasattr(dict__url, &#34;__contains__&#34;):
+    url: str = None
+    timeout: float = None
+    logstep: int = 1
 
-        @contextmanager
-        def ctx():
-            yield dict__url
+    def __post_init__(self):
+        self.list_of_iterators = []
 
-    else:
-        ctx = dict__url
+    def __lshift__(self, iterable):
+        self.list_of_iterators.append(iterable)
+        return self
 
-    for c, item in enumerate(iterable):
-        with ctx() as dic:
-            while True:
-                if item in dic:
-                    val = dic[item]
-                    if val == b&#34;d&#34;:
-                        status, action = &#34;already done&#34;, &#34;skipping&#34;
-                    elif not alive(val, timeout):
-                        status, action = &#34;expired&#34;, &#34;restarted&#34;
-                    else:
-                        status, action = &#34;already started&#34;, &#34;skipping&#34;
-                else:
-                    status, action = &#34;is new&#34;, &#34;started&#34;
-
-                if action == &#34;skipping&#34;:
-                    break
-                else:
-                    # Check for race condition.
-                    now = packb(datetime.now())
-                    sleep((random() + 1) / 1000)  # ~1ms
-                    if item not in dic or not alive(dic[item], timeout):
-                        break
-
-        if logstep is not None and c % logstep == 0:
-            print(f&#34;&#39;{item}&#39; {status}, {action}&#34;)
-        if action != &#34;skipping&#34;:
-            with ctx() as dic:
-                # Mark as started, as early as possible.
-                dic[item] = now
-            stop = [False]
-            t = Thread(target=ping, args=(ctx, item, timeout, stop), daemon=True)
-            t.start()
-            yield item
-            stop[0] = True
-            t.join()
-            with ctx() as dic:
-                dic[item] = b&#34;d&#34;
-            if logstep is not None and c % logstep == 0:
-                print(f&#34;&#39;{item}&#39; done&#34;)</code></pre>
+    def __iter__(self):
+        for items in self.list_of_iterators:
+            yield from locker(items, self.url, self.timeout, self.logstep)</code></pre>
 </details>
-</dd>
-<dt id="shelchemy.locker.ping"><code class="name flex">
-<span>def <span class="ident">ping</span></span>(<span>ctx, item, timeout, stop)</span>
-</code></dt>
+<h3>Class variables</h3>
+<dl>
+<dt id="shelchemy.scheduler.Scheduler.logstep"><code class="name">var <span class="ident">logstep</span> : int</code></dt>
 <dd>
 <div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def ping(ctx, item, timeout, stop):
-    with ctx() as dic:
-        while not stop[0]:
-            t = timeout / 2
-            if t is None or t == 0:
-                break
-            while not stop[0] and t &gt; 0:
-                sleep(min(0.2, t))
-                t -= 0.2
-            dic[item] = packb(datetime.now())</code></pre>
-</details>
 </dd>
-<dt id="shelchemy.locker.random"><code class="name flex">
-<span>def <span class="ident">random</span></span>(<span>)</span>
-</code></dt>
+<dt id="shelchemy.scheduler.Scheduler.timeout"><code class="name">var <span class="ident">timeout</span> : float</code></dt>
 <dd>
-<div class="desc"><p>random() -&gt; x in the interval [0, 1).</p></div>
+<div class="desc"></div>
+</dd>
+<dt id="shelchemy.scheduler.Scheduler.url"><code class="name">var <span class="ident">url</span> : str</code></dt>
+<dd>
+<div class="desc"></div>
 </dd>
 </dl>
-</section>
-<section>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -413,12 +265,16 @@ e processed!
 <li><code><a title="shelchemy" href="index.html">shelchemy</a></code></li>
 </ul>
 </li>
-<li><h3><a href="#header-functions">Functions</a></h3>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="shelchemy.scheduler.Scheduler" href="#shelchemy.scheduler.Scheduler">Scheduler</a></code></h4>
 <ul class="">
-<li><code><a title="shelchemy.locker.alive" href="#shelchemy.locker.alive">alive</a></code></li>
-<li><code><a title="shelchemy.locker.locker" href="#shelchemy.locker.locker">locker</a></code></li>
-<li><code><a title="shelchemy.locker.ping" href="#shelchemy.locker.ping">ping</a></code></li>
-<li><code><a title="shelchemy.locker.random" href="#shelchemy.locker.random">random</a></code></li>
+<li><code><a title="shelchemy.scheduler.Scheduler.logstep" href="#shelchemy.scheduler.Scheduler.logstep">logstep</a></code></li>
+<li><code><a title="shelchemy.scheduler.Scheduler.timeout" href="#shelchemy.scheduler.Scheduler.timeout">timeout</a></code></li>
+<li><code><a title="shelchemy.scheduler.Scheduler.url" href="#shelchemy.scheduler.Scheduler.url">url</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

@@ -50,6 +50,7 @@
 
 from contextlib import contextmanager
 from hashlib import md5
+from pickle import dumps
 from typing import TypeVar
 
 from sqlalchemy import Column, String, create_engine, LargeBinary
@@ -69,7 +70,12 @@ class Content(Base):
 
 def check(key):
     if not isinstance(key, str):
-        raise WrongKeyType(f&#34;Key must be string, not {type(key)}.&#34;, key)
+        try:
+            dump = dumps(key, protocol=5)
+        except Exception as e:
+            print(e)
+            raise WrongKeyType(f&#34;Key must be string or serializable (pickable), not {type(key)}.&#34;, key)
+        key = dump
     return md5(key.encode()).hexdigest() if len(key) not in [32, 40] else key
 
 
@@ -85,7 +91,7 @@ class Cache:
     r&#34;&#34;&#34;
     Dict-like persistence based on SQLAlchemy
 
-    str keys only
+    string or serializable (pickle) keys only
 
     When len(key) not in [32, 40], key is internally hashed to a MD5 hexdigest
 
@@ -287,7 +293,12 @@ class WrongKeyType(Exception):
 </summary>
 <pre><code class="python">def check(key):
     if not isinstance(key, str):
-        raise WrongKeyType(f&#34;Key must be string, not {type(key)}.&#34;, key)
+        try:
+            dump = dumps(key, protocol=5)
+        except Exception as e:
+            print(e)
+            raise WrongKeyType(f&#34;Key must be string or serializable (pickable), not {type(key)}.&#34;, key)
+        key = dump
     return md5(key.encode()).hexdigest() if len(key) not in [32, 40] else key</code></pre>
 </details>
 </dd>
@@ -319,7 +330,7 @@ def sopen(url=memory, ondup=&#34;overwrite&#34;, autopack=True, safepack=False, 
 </code></dt>
 <dd>
 <div class="desc"><p>Dict-like persistence based on SQLAlchemy</p>
-<p>str keys only</p>
+<p>string or serializable (pickle) keys only</p>
 <p>When len(key) not in [32, 40], key is internally hashed to a MD5 hexdigest</p>
 <p>Usage:</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; d = Cache(&quot;sqlite+pysqlite:////tmp/sqla-test.db&quot;)
@@ -364,7 +375,7 @@ False
     r&#34;&#34;&#34;
     Dict-like persistence based on SQLAlchemy
 
-    str keys only
+    string or serializable (pickle) keys only
 
     When len(key) not in [32, 40], key is internally hashed to a MD5 hexdigest
 
