@@ -7,7 +7,7 @@
 [![license: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 [![API documentation](https://img.shields.io/badge/doc-API%20%28auto%29-a0a0a0.svg)](https://shelchemy.github.io/shelchemy)
-
+[![Downloads](https://static.pepy.tech/badge/shelchemy)](https://pepy.tech/project/shelchemy)
 
 # shelchemy - Dict-like (shelve-like) storage wrapper for any DBMS (SQLAlchemy)
  

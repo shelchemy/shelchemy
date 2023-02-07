@@ -89,7 +89,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     &#39;logstep&#39; is the frequency of printed messages, &#39;None&#39; means &#39;no logs&#39;.
     &#39;timeout&#39;=None keeps the job status as &#39;started&#39; forever if the job never finishes.
 
-    # TODO: improve avoidance of race condition adopting a pre-started state
+    # TODO: improve avoidance of race condition adopting a pre-start &#34;assigned&#34; state
 
     &gt;&gt;&gt; from time import sleep
     &gt;&gt;&gt; names = [&#34;a&#34;,&#34;b&#34;,&#34;c&#34;,&#34;d&#34;,&#34;e&#34;]
@@ -220,7 +220,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
 'dict__url' is a dict-like object or a sqlalchemy url to store and query each item status
 'logstep' is the frequency of printed messages, 'None' means 'no logs'.
 'timeout'=None keeps the job status as 'started' forever if the job never finishes.</p>
-<h1 id="todo-improve-avoidance-of-race-condition-adopting-a-pre-started-state">TODO: improve avoidance of race condition adopting a pre-started state</h1>
+<h1 id="todo-improve-avoidance-of-race-condition-adopting-a-pre-start-assigned-state">TODO: improve avoidance of race condition adopting a pre-start "assigned" state</h1>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from time import sleep
 &gt;&gt;&gt; names = [&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;d&quot;,&quot;e&quot;]
 &gt;&gt;&gt; storage = {}
@@ -273,7 +273,7 @@ e processed!
     &#39;logstep&#39; is the frequency of printed messages, &#39;None&#39; means &#39;no logs&#39;.
     &#39;timeout&#39;=None keeps the job status as &#39;started&#39; forever if the job never finishes.
 
-    # TODO: improve avoidance of race condition adopting a pre-started state
+    # TODO: improve avoidance of race condition adopting a pre-start &#34;assigned&#34; state
 
     &gt;&gt;&gt; from time import sleep
     &gt;&gt;&gt; names = [&#34;a&#34;,&#34;b&#34;,&#34;c&#34;,&#34;d&#34;,&#34;e&#34;]
