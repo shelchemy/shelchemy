@@ -61,7 +61,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     'logstep' is the frequency of printed messages, 'None' means 'no logs'.
     'timeout'=None keeps the job status as 'started' forever if the job never finishes.
 
-    # TODO: improve avoidance of race condition adopting a pre-started state
+    # TODO: improve avoidance of race condition adopting a pre-start "assigned" state
 
     >>> from time import sleep
     >>> names = ["a","b","c","d","e"]
