@@ -168,10 +168,10 @@ class Cache:
         key = check(key)
         if self.autopack and packing:
             try:
-                from lazydf.compression import pack
+                from safeserializer.compression import pack
             except ModuleNotFoundError:
                 raise Exception(
-                    &#34;You need to install optional packages &#39;lazydf&#39; and &#39;lz4&#39; to be able to use compression inside shelchemy.&#34;
+                    &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                 )
             value = pack(value, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
         elif isinstance(value, str):
@@ -190,10 +190,10 @@ class Cache:
                 k = check(k)
                 if self.autopack and packing:
                     try:
-                        from lazydf.compression import pack
+                        from safeserializer.compression import pack
                     except ModuleNotFoundError:
                         raise Exception(
-                            &#34;You need to install optional packages &#39;lazydf&#39; and &#39;lz4&#39; to be able to use compression inside shelchemy.&#34;
+                            &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                         )
                     v = pack(v, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
                 elif isinstance(v, str):
@@ -215,10 +215,10 @@ class Cache:
                     ret = ret.blob
                     if self.autopack and packing:
                         try:
-                            from lazydf.compression import unpack
+                            from safeserializer.compression import unpack
                         except ModuleNotFoundError:
                             raise Exception(
-                                &#34;You need to install optional packages &#39;lazydf&#39; and &#39;lz4&#39; to be able to use compression inside shelchemy.&#34;
+                                &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                             )
                         ret = unpack(ret)
         return ret
@@ -452,10 +452,10 @@ False
         key = check(key)
         if self.autopack and packing:
             try:
-                from lazydf.compression import pack
+                from safeserializer.compression import pack
             except ModuleNotFoundError:
                 raise Exception(
-                    &#34;You need to install optional packages &#39;lazydf&#39; and &#39;lz4&#39; to be able to use compression inside shelchemy.&#34;
+                    &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                 )
             value = pack(value, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
         elif isinstance(value, str):
@@ -474,10 +474,10 @@ False
                 k = check(k)
                 if self.autopack and packing:
                     try:
-                        from lazydf.compression import pack
+                        from safeserializer.compression import pack
                     except ModuleNotFoundError:
                         raise Exception(
-                            &#34;You need to install optional packages &#39;lazydf&#39; and &#39;lz4&#39; to be able to use compression inside shelchemy.&#34;
+                            &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                         )
                     v = pack(v, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
                 elif isinstance(v, str):
@@ -499,10 +499,10 @@ False
                     ret = ret.blob
                     if self.autopack and packing:
                         try:
-                            from lazydf.compression import unpack
+                            from safeserializer.compression import unpack
                         except ModuleNotFoundError:
                             raise Exception(
-                                &#34;You need to install optional packages &#39;lazydf&#39; and &#39;lz4&#39; to be able to use compression inside shelchemy.&#34;
+                                &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                             )
                         ret = unpack(ret)
         return ret
@@ -615,10 +615,10 @@ def asdict(self):
             k = check(k)
             if self.autopack and packing:
                 try:
-                    from lazydf.compression import pack
+                    from safeserializer.compression import pack
                 except ModuleNotFoundError:
                     raise Exception(
-                        &#34;You need to install optional packages &#39;lazydf&#39; and &#39;lz4&#39; to be able to use compression inside shelchemy.&#34;
+                        &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                     )
                 v = pack(v, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
             elif isinstance(v, str):

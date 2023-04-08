@@ -1,1 +1,1 @@
-Add exception log to show data after temporenc problems
+Replace lazydf by safeserializer

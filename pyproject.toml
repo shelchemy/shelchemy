@@ -11,10 +11,16 @@ packages = [
 
 [tool.poetry.dependencies]
 python = "^3.10,<4.0"
-SQLAlchemy = "^1.4.39"
+SQLAlchemy = "^1.4.39,<2.0"
 temporenc = "^0.1.0"
+# Optional dependencies.
+lz4 = { version = "^4.0.2", optional = true }
+safeserializer = { version = "^0.230202.1", optional = true }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.extras]    #[tool.poetry.group.extras.dependencies]
+full = ["lz4", "safeserializer"]
+
+[tool.poetry.group.dev.dependencies]
 autoreadme = "^0.2102.20"
 pytest = "^7.1.2"
 pytest-cov = "^3.0.0"
@@ -27,8 +33,8 @@ pylint = "^2.7.4"
 pandas = "^1.4.3"
 ipython = "^8.0.1"
 click = "8.0.4"
-lazydf = "^0.220726.1"
 lz4 = "^4.0.2"
+safeserializer = "^0.230202.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

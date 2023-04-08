@@ -140,10 +140,10 @@ class Cache:
         key = check(key)
         if self.autopack and packing:
             try:
-                from lazydf.compression import pack
+                from safeserializer.compression import pack
             except ModuleNotFoundError:
                 raise Exception(
-                    "You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy."
+                    "You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy."
                 )
             value = pack(value, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
         elif isinstance(value, str):
@@ -162,10 +162,10 @@ class Cache:
                 k = check(k)
                 if self.autopack and packing:
                     try:
-                        from lazydf.compression import pack
+                        from safeserializer.compression import pack
                     except ModuleNotFoundError:
                         raise Exception(
-                            "You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy."
+                            "You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy."
                         )
                     v = pack(v, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
                 elif isinstance(v, str):
@@ -187,10 +187,10 @@ class Cache:
                     ret = ret.blob
                     if self.autopack and packing:
                         try:
-                            from lazydf.compression import unpack
+                            from safeserializer.compression import unpack
                         except ModuleNotFoundError:
                             raise Exception(
-                                "You need to install optional packages 'lazydf' and 'lz4' to be able to use compression inside shelchemy."
+                                "You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy."
                             )
                         ret = unpack(ret)
         return ret

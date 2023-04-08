@@ -1,7 +1,7 @@
 echo
 echo "----------------- updating poetry... -----------------------"
 poetry update
-poetry install
+poetry install --extras full --no-root
 echo "----------------- updated -----------------------"
 echo; echo
 
