@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "shelchemy"
-version = "0.220906.5"
-description = "Shelve-like dict using sqlachemy as backend, and lazy scheduler for resuming tasks"
+version = "1.230706.0"
+description = "Shelve-like dict using sqlalchemy as a backend, and lazy scheduler for resuming tasks"
 authors = ["davips <dpsabc@gmail.com>"]
 license = "GPL"
 readme = 'README.md'
@@ -39,4 +39,3 @@ safeserializer = "^0.230202.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
-

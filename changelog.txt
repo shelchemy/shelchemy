@@ -1,1 +1,2 @@
-Replace lazydf by safeserializer
+Reduce open/build time for SGBDs
+Re-structure module

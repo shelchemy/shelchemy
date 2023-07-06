@@ -49,7 +49,7 @@ def alive(val, timeout):
     except Exception as e:
         print(val)
         print(unpackb(val))
-        raise e
+        raise e from None
 
 
 def locker(iterable, dict__url=None, timeout=None, logstep=1):

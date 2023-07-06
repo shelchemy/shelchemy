@@ -25,19 +25,13 @@ from hashlib import md5
 from pickle import dumps
 from typing import TypeVar
 
-from sqlalchemy import Column, String, create_engine, LargeBinary
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+from shelchemy import memory
+from shelchemy.sqla import Base, Content
+
 VT = TypeVar("VT")
-Base = declarative_base()
-memory = "sqlite+pysqlite:///:memory:"
-
-
-class Content(Base):
-    __tablename__ = "content"
-    id = Column(String(40), primary_key=True)
-    blob = Column(LargeBinary(length=(2**32) - 1))
 
 
 def check(key):
@@ -51,14 +45,6 @@ def check(key):
     return md5(key.encode()).hexdigest() if len(key) not in [32, 40] else key
 
 
-@contextmanager
-def sopen(url=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False):
-    engine = create_engine(url, echo=debug)
-    Base.metadata.create_all(engine)
-    with Session(engine, autoflush=False) as session:
-        yield Cache(session, ondup, autopack, safepack, stablepack, debug)
-
-
 class Cache:
     r"""
     Dict-like persistence based on SQLAlchemy
@@ -69,6 +55,7 @@ class Cache:
 
     Usage:
 
+    >>> from shelchemy import sopen
     >>> d = Cache("sqlite+pysqlite:////tmp/sqla-test.db")
     >>> d["x"] = 5
     >>> d["x"]
@@ -104,18 +91,21 @@ class Cache:
     False
     """
 
-    def __init__(self, session=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False):
+    def __init__(self, session=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False, _engine=None):
         if isinstance(session, str):
 
             @contextmanager
             def sessionctx():
                 engine = create_engine(url=session, echo=debug)
-                Base.metadata.create_all(engine)
+                self._engine = engine
                 session_ = Session(engine, autoflush=False)
                 yield session_
                 session_.close()
 
         else:
+            if _engine is None:
+                raise Exception(f"Missing `_engine` for external non string session.")
+            self._engine = _engine
 
             @contextmanager
             def sessionctx():
@@ -127,14 +117,23 @@ class Cache:
         self.safepack = safepack
         self.stablepack = stablepack
 
+    def ensure_build(self, query__f):
+        with self.sessionctx() as session:
+            try:
+                return query__f(session)
+            except Exception as e:
+                try:
+                    Base.metadata.create_all(self._engine)
+                except:
+                    raise e from None
+        return query__f(session)
+
     def __contains__(self, key):
         key = check(key)
-        with self.sessionctx() as session:
-            return session.query(Content).filter_by(id=key).first() is not None
+        return self.ensure_build(lambda session: session.query(Content).filter_by(id=key).first() is not None)
 
     def __iter__(self):
-        with self.sessionctx() as session:
-            return (c.id for c in session.query(Content).all())
+        return self.ensure_build(lambda session: (c.id for c in session.query(Content).all()))
 
     def __setitem__(self, key: str, value, packing=True):
         key = check(key)
@@ -148,7 +147,8 @@ class Cache:
             value = pack(value, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
         elif isinstance(value, str):
             value = value.encode()
-        with self.sessionctx() as session:
+
+        def f(session):
             if self.ondup == "overwrite":
                 session.query(Content).filter_by(id=key).delete()
             if self.ondup == "stop" or session.query(Content).filter_by(id=key).first() is None:
@@ -156,8 +156,10 @@ class Cache:
                 session.add(content)
             session.commit()
 
+        self.ensure_build(f)
+
     def update(self, dic, packing=True):
-        with self.sessionctx() as session:
+        def f(session):
             for k, v in dic.items():
                 k = check(k)
                 if self.autopack and packing:
@@ -176,12 +178,14 @@ class Cache:
                 if self.ondup == "stop" or session.query(Content).filter_by(id=k).first() is None:
                     content = Content(id=k, blob=v)
                     session.add(content)
-
             session.commit()
+
+        self.ensure_build(f)
 
     def __getitem__(self, key, packing=True):
         key = check(key)
-        with self.sessionctx() as session:
+
+        def f(session):
             if ret := session.query(Content).get(key):
                 if ret is not None:
                     ret = ret.blob
@@ -193,13 +197,18 @@ class Cache:
                                 "You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy."
                             )
                         ret = unpack(ret)
-        return ret
+            return ret
+
+        return self.ensure_build(f)
 
     def __delitem__(self, key):
         key = check(key)
-        with self.sessionctx() as session:
+
+        def f(session):
             session.query(Content).filter_by(id=key).delete()
             session.commit()
+
+        self.ensure_build(f)
 
     def __getattr__(self, key):
         key_ = check(key)
@@ -208,8 +217,7 @@ class Cache:
         return self.__getattribute__(key)
 
     def __len__(self):
-        with self.sessionctx() as session:
-            return session.query(Content).count()
+        return self.ensure_build(lambda session: session.query(Content).count())
 
     def __repr__(self):
         return repr(self.asdict)
