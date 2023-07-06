@@ -53,19 +53,13 @@ from hashlib import md5
 from pickle import dumps
 from typing import TypeVar
 
-from sqlalchemy import Column, String, create_engine, LargeBinary
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+from shelchemy import memory
+from shelchemy.sqla import Base, Content
+
 VT = TypeVar(&#34;VT&#34;)
-Base = declarative_base()
-memory = &#34;sqlite+pysqlite:///:memory:&#34;
-
-
-class Content(Base):
-    __tablename__ = &#34;content&#34;
-    id = Column(String(40), primary_key=True)
-    blob = Column(LargeBinary(length=(2**32) - 1))
 
 
 def check(key):
@@ -79,14 +73,6 @@ def check(key):
     return md5(key.encode()).hexdigest() if len(key) not in [32, 40] else key
 
 
-@contextmanager
-def sopen(url=memory, ondup=&#34;overwrite&#34;, autopack=True, safepack=False, stablepack=False, debug=False):
-    engine = create_engine(url, echo=debug)
-    Base.metadata.create_all(engine)
-    with Session(engine, autoflush=False) as session:
-        yield Cache(session, ondup, autopack, safepack, stablepack, debug)
-
-
 class Cache:
     r&#34;&#34;&#34;
     Dict-like persistence based on SQLAlchemy
@@ -97,6 +83,7 @@ class Cache:
 
     Usage:
 
+    &gt;&gt;&gt; from shelchemy import sopen
     &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;)
     &gt;&gt;&gt; d[&#34;x&#34;] = 5
     &gt;&gt;&gt; d[&#34;x&#34;]
@@ -132,18 +119,23 @@ class Cache:
     False
     &#34;&#34;&#34;
 
-    def __init__(self, session=memory, ondup=&#34;overwrite&#34;, autopack=True, safepack=False, stablepack=False, debug=False):
+    def __init__(
+        self, session=memory, ondup=&#34;overwrite&#34;, autopack=True, safepack=False, stablepack=False, debug=False, _engine=None
+    ):
         if isinstance(session, str):
 
             @contextmanager
             def sessionctx():
                 engine = create_engine(url=session, echo=debug)
-                Base.metadata.create_all(engine)
+                self._engine = engine
                 session_ = Session(engine, autoflush=False)
                 yield session_
                 session_.close()
 
         else:
+            if _engine is None:
+                raise Exception(f&#34;Missing `_engine` for external non string session.&#34;)
+            self._engine = _engine
 
             @contextmanager
             def sessionctx():
@@ -155,14 +147,23 @@ class Cache:
         self.safepack = safepack
         self.stablepack = stablepack
 
+    def ensure_build(self, query__f):
+        with self.sessionctx() as session:
+            try:
+                return query__f(session)
+            except Exception as e:
+                try:
+                    Base.metadata.create_all(self._engine)
+                except:
+                    raise e from None
+        return query__f(session)
+
     def __contains__(self, key):
         key = check(key)
-        with self.sessionctx() as session:
-            return session.query(Content).filter_by(id=key).first() is not None
+        return self.ensure_build(lambda session: session.query(Content).filter_by(id=key).first() is not None)
 
     def __iter__(self):
-        with self.sessionctx() as session:
-            return (c.id for c in session.query(Content).all())
+        return self.ensure_build(lambda session: (c.id for c in session.query(Content).all()))
 
     def __setitem__(self, key: str, value, packing=True):
         key = check(key)
@@ -176,7 +177,8 @@ class Cache:
             value = pack(value, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
         elif isinstance(value, str):
             value = value.encode()
-        with self.sessionctx() as session:
+
+        def f(session):
             if self.ondup == &#34;overwrite&#34;:
                 session.query(Content).filter_by(id=key).delete()
             if self.ondup == &#34;stop&#34; or session.query(Content).filter_by(id=key).first() is None:
@@ -184,8 +186,10 @@ class Cache:
                 session.add(content)
             session.commit()
 
+        self.ensure_build(f)
+
     def update(self, dic, packing=True):
-        with self.sessionctx() as session:
+        def f(session):
             for k, v in dic.items():
                 k = check(k)
                 if self.autopack and packing:
@@ -204,12 +208,14 @@ class Cache:
                 if self.ondup == &#34;stop&#34; or session.query(Content).filter_by(id=k).first() is None:
                     content = Content(id=k, blob=v)
                     session.add(content)
-
             session.commit()
+
+        self.ensure_build(f)
 
     def __getitem__(self, key, packing=True):
         key = check(key)
-        with self.sessionctx() as session:
+
+        def f(session):
             if ret := session.query(Content).get(key):
                 if ret is not None:
                     ret = ret.blob
@@ -221,13 +227,18 @@ class Cache:
                                 &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                             )
                         ret = unpack(ret)
-        return ret
+            return ret
+
+        return self.ensure_build(f)
 
     def __delitem__(self, key):
         key = check(key)
-        with self.sessionctx() as session:
+
+        def f(session):
             session.query(Content).filter_by(id=key).delete()
             session.commit()
+
+        self.ensure_build(f)
 
     def __getattr__(self, key):
         key_ = check(key)
@@ -236,8 +247,7 @@ class Cache:
         return self.__getattribute__(key)
 
     def __len__(self):
-        with self.sessionctx() as session:
-            return session.query(Content).count()
+        return self.ensure_build(lambda session: session.query(Content).count())
 
     def __repr__(self):
         return repr(self.asdict)
@@ -302,23 +312,6 @@ class WrongKeyType(Exception):
     return md5(key.encode()).hexdigest() if len(key) not in [32, 40] else key</code></pre>
 </details>
 </dd>
-<dt id="shelchemy.cache.sopen"><code class="name flex">
-<span>def <span class="ident">sopen</span></span>(<span>url='sqlite+pysqlite:///:memory:', ondup='overwrite', autopack=True, safepack=False, stablepack=False, debug=False)</span>
-</code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">@contextmanager
-def sopen(url=memory, ondup=&#34;overwrite&#34;, autopack=True, safepack=False, stablepack=False, debug=False):
-    engine = create_engine(url, echo=debug)
-    Base.metadata.create_all(engine)
-    with Session(engine, autoflush=False) as session:
-        yield Cache(session, ondup, autopack, safepack, stablepack, debug)</code></pre>
-</details>
-</dd>
 </dl>
 </section>
 <section>
@@ -333,7 +326,8 @@ def sopen(url=memory, ondup=&#34;overwrite&#34;, autopack=True, safepack=False, 
 <p>string or serializable (pickle) keys only</p>
 <p>When len(key) not in [32, 40], key is internally hashed to a MD5 hexdigest</p>
 <p>Usage:</p>
-<pre><code class="language-python-repl">&gt;&gt;&gt; d = Cache(&quot;sqlite+pysqlite:////tmp/sqla-test.db&quot;)
+<pre><code class="language-python-repl">&gt;&gt;&gt; from shelchemy import sopen
+&gt;&gt;&gt; d = Cache(&quot;sqlite+pysqlite:////tmp/sqla-test.db&quot;)
 &gt;&gt;&gt; d[&quot;x&quot;] = 5
 &gt;&gt;&gt; d[&quot;x&quot;]
 5
@@ -381,6 +375,7 @@ False
 
     Usage:
 
+    &gt;&gt;&gt; from shelchemy import sopen
     &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;)
     &gt;&gt;&gt; d[&#34;x&#34;] = 5
     &gt;&gt;&gt; d[&#34;x&#34;]
@@ -416,18 +411,23 @@ False
     False
     &#34;&#34;&#34;
 
-    def __init__(self, session=memory, ondup=&#34;overwrite&#34;, autopack=True, safepack=False, stablepack=False, debug=False):
+    def __init__(
+        self, session=memory, ondup=&#34;overwrite&#34;, autopack=True, safepack=False, stablepack=False, debug=False, _engine=None
+    ):
         if isinstance(session, str):
 
             @contextmanager
             def sessionctx():
                 engine = create_engine(url=session, echo=debug)
-                Base.metadata.create_all(engine)
+                self._engine = engine
                 session_ = Session(engine, autoflush=False)
                 yield session_
                 session_.close()
 
         else:
+            if _engine is None:
+                raise Exception(f&#34;Missing `_engine` for external non string session.&#34;)
+            self._engine = _engine
 
             @contextmanager
             def sessionctx():
@@ -439,14 +439,23 @@ False
         self.safepack = safepack
         self.stablepack = stablepack
 
+    def ensure_build(self, query__f):
+        with self.sessionctx() as session:
+            try:
+                return query__f(session)
+            except Exception as e:
+                try:
+                    Base.metadata.create_all(self._engine)
+                except:
+                    raise e from None
+        return query__f(session)
+
     def __contains__(self, key):
         key = check(key)
-        with self.sessionctx() as session:
-            return session.query(Content).filter_by(id=key).first() is not None
+        return self.ensure_build(lambda session: session.query(Content).filter_by(id=key).first() is not None)
 
     def __iter__(self):
-        with self.sessionctx() as session:
-            return (c.id for c in session.query(Content).all())
+        return self.ensure_build(lambda session: (c.id for c in session.query(Content).all()))
 
     def __setitem__(self, key: str, value, packing=True):
         key = check(key)
@@ -460,7 +469,8 @@ False
             value = pack(value, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
         elif isinstance(value, str):
             value = value.encode()
-        with self.sessionctx() as session:
+
+        def f(session):
             if self.ondup == &#34;overwrite&#34;:
                 session.query(Content).filter_by(id=key).delete()
             if self.ondup == &#34;stop&#34; or session.query(Content).filter_by(id=key).first() is None:
@@ -468,8 +478,10 @@ False
                 session.add(content)
             session.commit()
 
+        self.ensure_build(f)
+
     def update(self, dic, packing=True):
-        with self.sessionctx() as session:
+        def f(session):
             for k, v in dic.items():
                 k = check(k)
                 if self.autopack and packing:
@@ -488,12 +500,14 @@ False
                 if self.ondup == &#34;stop&#34; or session.query(Content).filter_by(id=k).first() is None:
                     content = Content(id=k, blob=v)
                     session.add(content)
-
             session.commit()
+
+        self.ensure_build(f)
 
     def __getitem__(self, key, packing=True):
         key = check(key)
-        with self.sessionctx() as session:
+
+        def f(session):
             if ret := session.query(Content).get(key):
                 if ret is not None:
                     ret = ret.blob
@@ -505,13 +519,18 @@ False
                                 &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                             )
                         ret = unpack(ret)
-        return ret
+            return ret
+
+        return self.ensure_build(f)
 
     def __delitem__(self, key):
         key = check(key)
-        with self.sessionctx() as session:
+
+        def f(session):
             session.query(Content).filter_by(id=key).delete()
             session.commit()
+
+        self.ensure_build(f)
 
     def __getattr__(self, key):
         key_ = check(key)
@@ -520,8 +539,7 @@ False
         return self.__getattribute__(key)
 
     def __len__(self):
-        with self.sessionctx() as session:
-            return session.query(Content).count()
+        return self.ensure_build(lambda session: session.query(Content).count())
 
     def __repr__(self):
         return repr(self.asdict)
@@ -573,6 +591,27 @@ def asdict(self):
     raise NotImplementedError</code></pre>
 </details>
 </dd>
+<dt id="shelchemy.cache.Cache.ensure_build"><code class="name flex">
+<span>def <span class="ident">ensure_build</span></span>(<span>self, query__f)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def ensure_build(self, query__f):
+    with self.sessionctx() as session:
+        try:
+            return query__f(session)
+        except Exception as e:
+            try:
+                Base.metadata.create_all(self._engine)
+            except:
+                raise e from None
+    return query__f(session)</code></pre>
+</details>
+</dd>
 <dt id="shelchemy.cache.Cache.items"><code class="name flex">
 <span>def <span class="ident">items</span></span>(<span>self)</span>
 </code></dt>
@@ -610,7 +649,7 @@ def asdict(self):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def update(self, dic, packing=True):
-    with self.sessionctx() as session:
+    def f(session):
         for k, v in dic.items():
             k = check(k)
             if self.autopack and packing:
@@ -629,89 +668,9 @@ def asdict(self):
             if self.ondup == &#34;stop&#34; or session.query(Content).filter_by(id=k).first() is None:
                 content = Content(id=k, blob=v)
                 session.add(content)
+        session.commit()
 
-        session.commit()</code></pre>
-</details>
-</dd>
-</dl>
-</dd>
-<dt id="shelchemy.cache.Content"><code class="flex name class">
-<span>class <span class="ident">Content</span></span>
-<span>(</span><span>**kwargs)</span>
-</code></dt>
-<dd>
-<div class="desc"><p>The base class of the class hierarchy.</p>
-<p>When called, it accepts no arguments and returns a new featureless
-instance that has no instance attributes and cannot be given any.</p>
-<p>A simple constructor that allows initialization from kwargs.</p>
-<p>Sets attributes on the constructed instance using the names and
-values in <code>kwargs</code>.</p>
-<p>Only keys that are present as
-attributes of the instance's class are allowed. These could be,
-for example, any mapped columns or relationships.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">class Content(Base):
-    __tablename__ = &#34;content&#34;
-    id = Column(String(40), primary_key=True)
-    blob = Column(LargeBinary(length=(2**32) - 1))</code></pre>
-</details>
-<h3>Ancestors</h3>
-<ul class="hlist">
-<li>sqlalchemy.orm.decl_api.Base</li>
-</ul>
-<h3>Instance variables</h3>
-<dl>
-<dt id="shelchemy.cache.Content.blob"><code class="name">var <span class="ident">blob</span></code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def __get__(self, instance, owner):
-    if instance is None:
-        return self
-
-    dict_ = instance_dict(instance)
-    if self._supports_population and self.key in dict_:
-        return dict_[self.key]
-    else:
-        try:
-            state = instance_state(instance)
-        except AttributeError as err:
-            util.raise_(
-                orm_exc.UnmappedInstanceError(instance),
-                replace_context=err,
-            )
-        return self.impl.get(state, dict_)</code></pre>
-</details>
-</dd>
-<dt id="shelchemy.cache.Content.id"><code class="name">var <span class="ident">id</span></code></dt>
-<dd>
-<div class="desc"></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def __get__(self, instance, owner):
-    if instance is None:
-        return self
-
-    dict_ = instance_dict(instance)
-    if self._supports_population and self.key in dict_:
-        return dict_[self.key]
-    else:
-        try:
-            state = instance_state(instance)
-        except AttributeError as err:
-            util.raise_(
-                orm_exc.UnmappedInstanceError(instance),
-                replace_context=err,
-            )
-        return self.impl.get(state, dict_)</code></pre>
+    self.ensure_build(f)</code></pre>
 </details>
 </dd>
 </dl>
@@ -752,26 +711,19 @@ for example, any mapped columns or relationships.</p></div>
 <li><h3><a href="#header-functions">Functions</a></h3>
 <ul class="">
 <li><code><a title="shelchemy.cache.check" href="#shelchemy.cache.check">check</a></code></li>
-<li><code><a title="shelchemy.cache.sopen" href="#shelchemy.cache.sopen">sopen</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
 <h4><code><a title="shelchemy.cache.Cache" href="#shelchemy.cache.Cache">Cache</a></code></h4>
-<ul class="">
+<ul class="two-column">
 <li><code><a title="shelchemy.cache.Cache.asdict" href="#shelchemy.cache.Cache.asdict">asdict</a></code></li>
 <li><code><a title="shelchemy.cache.Cache.copy" href="#shelchemy.cache.Cache.copy">copy</a></code></li>
+<li><code><a title="shelchemy.cache.Cache.ensure_build" href="#shelchemy.cache.Cache.ensure_build">ensure_build</a></code></li>
 <li><code><a title="shelchemy.cache.Cache.items" href="#shelchemy.cache.Cache.items">items</a></code></li>
 <li><code><a title="shelchemy.cache.Cache.keys" href="#shelchemy.cache.Cache.keys">keys</a></code></li>
 <li><code><a title="shelchemy.cache.Cache.update" href="#shelchemy.cache.Cache.update">update</a></code></li>
-</ul>
-</li>
-<li>
-<h4><code><a title="shelchemy.cache.Content" href="#shelchemy.cache.Content">Content</a></code></h4>
-<ul class="">
-<li><code><a title="shelchemy.cache.Content.blob" href="#shelchemy.cache.Content.blob">blob</a></code></li>
-<li><code><a title="shelchemy.cache.Content.id" href="#shelchemy.cache.Content.id">id</a></code></li>
 </ul>
 </li>
 <li>

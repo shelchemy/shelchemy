@@ -91,7 +91,9 @@ class Cache:
     False
     """
 
-    def __init__(self, session=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False, _engine=None):
+    def __init__(
+        self, session=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False, _engine=None
+    ):
         if isinstance(session, str):
 
             @contextmanager
