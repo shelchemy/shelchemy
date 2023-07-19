@@ -101,9 +101,13 @@ class Cache:
                 engine = create_engine(url=session, echo=debug)
                 self._engine = engine
                 session_ = Session(engine, autoflush=False)
-                yield session_
-                session_.close()
-
+                try:
+                    yield session_
+                except:
+                    session.rollback()
+                    raise
+                finally:
+                    session.close()
         else:
             if _engine is None:
                 raise Exception(f"Missing `_engine` for external non string session.")
@@ -111,7 +115,13 @@ class Cache:
 
             @contextmanager
             def sessionctx():
-                yield session
+                try:
+                    yield session
+                except:
+                    session.rollback()
+                    raise
+                finally:
+                    session.close()
 
         self.sessionctx = sessionctx
         self.ondup = ondup
