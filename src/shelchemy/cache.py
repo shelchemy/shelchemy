@@ -104,10 +104,11 @@ class Cache:
                 try:
                     yield session_
                 except:
-                    session.rollback()
+                    session_.rollback()
                     raise
                 finally:
-                    session.close()
+                    session_.close()
+
         else:
             if _engine is None:
                 raise Exception(f"Missing `_engine` for external non string session.")
