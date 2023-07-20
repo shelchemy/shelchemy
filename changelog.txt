@@ -1,2 +1,2 @@
-Reduce open/build time for SGBDs
-Re-structure module
+Fix 'Cache not callable' error, and nonstr keys
+Try to catch exception 'Cant reconnect until invalid transaction is rolled back'

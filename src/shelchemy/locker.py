@@ -102,13 +102,14 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     'd' already done, skipping
     'e' already done, skipping
     """
+    from shelchemy.cache import Cache
     if dict__url is None:
         ctx = partial(shelve.open, "/tmp/locker.db")
     elif isinstance(dict__url, str):
         from shelchemy.cache import sopen
 
         ctx = partial(sopen, dict__url, autopack=False)
-    elif isinstance(dict__url, dict) and hasattr(dict__url, "__contains__"):
+    elif isinstance(dict__url, (dict, Cache)) and hasattr(dict__url, "__contains__"):
 
         @contextmanager
         def ctx():
