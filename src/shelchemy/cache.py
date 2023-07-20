@@ -41,10 +41,10 @@ def check(key):
         except Exception as e:
             print(e)
             raise WrongKeyType(f"Key must be string or serializable (pickable), not {type(key)}.", key)
-        key = dump
-    else:
-        key = key.encode()
-    return md5(key).hexdigest() if len(key) not in [32, 40] else key
+        key = md5(dump).hexdigest()
+    elif len(key) not in [32, 40]:
+        key = md5(key.encode()).hexdigest()
+    return key
 
 
 class Cache:

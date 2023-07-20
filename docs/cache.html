@@ -69,8 +69,10 @@ def check(key):
         except Exception as e:
             print(e)
             raise WrongKeyType(f&#34;Key must be string or serializable (pickable), not {type(key)}.&#34;, key)
-        key = dump
-    return md5(key.encode()).hexdigest() if len(key) not in [32, 40] else key
+        key = md5(dump).hexdigest()
+    elif len(key) not in [32, 40]:
+        key = md5(key.encode()).hexdigest()
+    return key
 
 
 class Cache:
@@ -319,8 +321,10 @@ class WrongKeyType(Exception):
         except Exception as e:
             print(e)
             raise WrongKeyType(f&#34;Key must be string or serializable (pickable), not {type(key)}.&#34;, key)
-        key = dump
-    return md5(key.encode()).hexdigest() if len(key) not in [32, 40] else key</code></pre>
+        key = md5(dump).hexdigest()
+    elif len(key) not in [32, 40]:
+        key = md5(key.encode()).hexdigest()
+    return key</code></pre>
 </details>
 </dd>
 </dl>
