@@ -90,7 +90,7 @@ e processed!
 <p>
 
 ```python3
-
+from shelchemy import sopen
 from shelchemy.cache import Cache
 
 d = Cache("sqlite+pysqlite:////tmp/sqla-test.db")
@@ -119,6 +119,7 @@ for k, v in d.items():
     print(k, v)
 print("x" in d)
 """
+872d417d62b78366a71ab9fee25f14dc None
 aed0339093d97301965a4e23dac3424a b'only bytes when autopack=False'
 a b'by'
 x 5
@@ -140,7 +141,37 @@ False
 
 print(d)
 """
-{'aed0339093d97301965a4e23dac3424a': b'only bytes when autopack=False', 'a': b'by', 'b': None}
+{'872d417d62b78366a71ab9fee25f14dc': None, 'aed0339093d97301965a4e23dac3424a': b'only bytes when autopack=False', 'a': b'by', 'b': None}
+"""
+```
+
+```python3
+
+# Using a context manager.
+with sopen() as db:
+    print("x" in db)
+    print(db)
+
+    db["x"] = b"asd"
+    print(db)
+    print(db["x"] == b"asd")
+    print("x" in db)
+    print(db.x == b"asd")
+
+    del db["x"]
+    print("x" in db)
+
+    db["any string key longer than 40 characters will be hashed depending if the DBMS backend is used"] = None
+    print(db)
+"""
+False
+{}
+{'x': b'asd'}
+True
+True
+True
+False
+{'872d417d62b78366a71ab9fee25f14dc': None}
 """
 ```
 
