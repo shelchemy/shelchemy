@@ -35,20 +35,17 @@ VT = TypeVar("VT")
 
 
 def check(key):
-    if not isinstance(key, str):
-        try:
-            dump = dumps(key, protocol=5)
-        except Exception as e:  # pragma: no cover
-            print(e)
-            raise WrongKeyType(f"Key must be string or serializable (pickable), not {type(key)}.", key)
-        key = md5(dump).hexdigest()
-    elif len(key) not in [32, 40]:
-        key = md5(key.encode()).hexdigest()
-    return key
+    if isinstance(key, str):
+        return key
+    try:
+        dump = dumps(key, protocol=5)
+    except Exception as e:  # pragma: no cover
+        print(e)
+        raise WrongKeyType(f"Key must be string or serializable (pickable), not {type(key)}.", key)
+    return md5(dump).hexdigest()
 
 
 class Cache:
-
     r"""
     Dict-like persistence based on SQLAlchemy
 
@@ -68,11 +65,11 @@ class Cache:
     ...     d["xxx"]
     ... except KeyError as m:
     ...     print(m)
-    'f561aaf6ef0bf14d4208bb46a4ccb3ad'
+    'xxx'
     >>> for k, v in d.items():
     ...     print(k, v)
-    9dd4e461268c8034f5c8564e155c67a6 5
-    92eb5ffee6ae2fec3ad71c777531578f None
+    x 5
+    b None
     >>> "x" in d
     True
     >>> len(d)
@@ -81,20 +78,20 @@ class Cache:
     >>> "x" in d
     False
     >>> d
-    {'92eb5ffee6ae2fec3ad71c777531578f': None}
+    {'b': None}
     >>> with sopen() as db:
     ...     "x" in db
     ...     db
     ...     db["x"] = b"asd"
     ...     db
-    ...     db["9dd4e461268c8034f5c8564e155c67a6"] == b"asd"
+    ...     db["x"] == b"asd"
     ...     "x" in db
     ...     db.x == b"asd"
     ...     del db["x"]
     ...     "x" in db
     False
     {}
-    {'9dd4e461268c8034f5c8564e155c67a6': b'asd'}
+    {'x': b'asd'}
     True
     True
     True
@@ -103,11 +100,11 @@ class Cache:
     >>> d.a
     b'by'
     >>> list(d.keys())
-    ['92eb5ffee6ae2fec3ad71c777531578f', '0cc175b9c0f1b6a831c399e269772661']
+    ['b', 'a']
     >>> d
-    {'92eb5ffee6ae2fec3ad71c777531578f': None, '0cc175b9c0f1b6a831c399e269772661': b'by'}
+    {'b': None, 'a': b'by'}
     >>> str(d)
-    "{'92eb5ffee6ae2fec3ad71c777531578f': None, '0cc175b9c0f1b6a831c399e269772661': b'by'}"
+    "{'b': None, 'a': b'by'}"
     >>> d = Cache("sqlite+pysqlite:////tmp/sqla-test.db", autopack=False)
     >>> d[[1,2,"a"]] = b"only bytes when autopack=False"
     >>> d[[1,2,"a"]]
@@ -118,7 +115,7 @@ class Cache:
     """
 
     def __init__(
-        self, session=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False, _engine=None
+            self, session=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False, _engine=None
     ):
         if isinstance(session, str):
 
