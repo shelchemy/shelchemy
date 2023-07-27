@@ -33,7 +33,12 @@ poetry install
 ```
 
 ### Examples
-Some usage examples.
+This library is more usefull when used along with `hdict`.
+Here are some possible usages by itself.
+
+<<scheduler>>
+
+<<cache>>
 
 
 ## Grants
