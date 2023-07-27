@@ -1,3 +1,1 @@
-Fix md5 wrong IF condition on key
-Fix 'Cache not callable' error, and nonstr keys
-Try to catch exception 'Cant reconnect until invalid transaction is rolled back'
+Raise KeyError instead of returning None, so None can be used as a value as any other

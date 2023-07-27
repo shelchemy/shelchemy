@@ -48,6 +48,7 @@ def check(key):
 
 
 class Cache:
+
     r"""
     Dict-like persistence based on SQLAlchemy
 
@@ -60,20 +61,27 @@ class Cache:
     >>> from shelchemy import sopen
     >>> d = Cache("sqlite+pysqlite:////tmp/sqla-test.db")
     >>> d["x"] = 5
-    >>> d["x"]
-    5
+    >>> d["b"] = None
+    >>> d["x"], d["b"]
+    (5, None)
+    >>> try:
+    ...     d["xxx"]
+    ... except KeyError as m:
+    ...     print(m)
+    'f561aaf6ef0bf14d4208bb46a4ccb3ad'
     >>> for k, v in d.items():
     ...     print(k, v)
     9dd4e461268c8034f5c8564e155c67a6 5
+    92eb5ffee6ae2fec3ad71c777531578f None
     >>> "x" in d
     True
     >>> len(d)
-    1
+    2
     >>> del d["x"]
     >>> "x" in d
     False
     >>> d
-    {}
+    {'92eb5ffee6ae2fec3ad71c777531578f': None}
     >>> with sopen() as db:
     ...     "x" in db
     ...     db
@@ -92,7 +100,6 @@ class Cache:
     True
     False
     """
-
     def __init__(
         self, session=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False, _engine=None
     ):
@@ -201,17 +208,18 @@ class Cache:
         key = check(key)
 
         def f(session):
-            if ret := session.query(Content).get(key):
-                if ret is not None:
-                    ret = ret.blob
-                    if self.autopack and packing:
-                        try:
-                            from safeserializer.compression import unpack
-                        except ModuleNotFoundError:
-                            raise Exception(
-                                "You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy."
-                            )
-                        ret = unpack(ret)
+            ret = session.query(Content).get(key)
+            if ret is None:
+                raise KeyError(key)
+            ret = ret.blob
+            if self.autopack and packing:
+                try:
+                    from safeserializer.compression import unpack
+                except ModuleNotFoundError:
+                    raise Exception(
+                        "You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy."
+                    )
+                ret = unpack(ret)
             return ret
 
         return self.ensure_build(f)
