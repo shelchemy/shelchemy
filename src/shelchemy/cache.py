@@ -99,7 +99,13 @@ class Cache:
     True
     True
     False
+    >>> d = Cache("sqlite+pysqlite:////tmp/sqla-test.db", autopack=False)
+    >>> d[[1,2,"a"]] = b"only bytes when autopack=False"
+    >>> d[[1,2,"a"]]
+    b"only bytes when autopack=False"
+    >>>
     """
+
     def __init__(
         self, session=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False, _engine=None
     ):
@@ -112,14 +118,14 @@ class Cache:
                 session_ = Session(engine, autoflush=False)
                 try:
                     yield session_
-                except:
+                except:  # pragma: no cover
                     session_.rollback()
                     raise
                 finally:
                     session_.close()
 
         else:
-            if _engine is None:
+            if _engine is None:  # pragma: no cover
                 raise Exception(f"Missing `_engine` for external non string session.")
             self._engine = _engine
 
@@ -127,7 +133,7 @@ class Cache:
             def sessionctx():
                 try:
                     yield session
-                except:
+                except:  # pragma: no cover
                     session.rollback()
                     raise
                 finally:
@@ -146,7 +152,7 @@ class Cache:
             except Exception as e:
                 try:
                     Base.metadata.create_all(self._engine)
-                except:
+                except:  # pragma: no cover
                     raise e from None
         return query__f(session)
 
@@ -162,13 +168,11 @@ class Cache:
         if self.autopack and packing:
             try:
                 from safeserializer.compression import pack
-            except ModuleNotFoundError:
+            except ModuleNotFoundError:  # pragma: no cover
                 raise Exception(
                     "You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy."
                 )
             value = pack(value, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
-        elif isinstance(value, str):
-            value = value.encode()
 
         def f(session):
             if self.ondup == "overwrite":

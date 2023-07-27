@@ -1,1 +1,4 @@
+Complete tests
+Fix autopack=False
+Attempt to make race condition near impossible
 Raise KeyError instead of returning None, so None can be used as a value as any other
