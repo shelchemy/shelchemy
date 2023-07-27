@@ -64,6 +64,8 @@ VT = TypeVar(&#34;VT&#34;)
 
 def check(key):
     if isinstance(key, str):
+        if len(key) &gt; 40:
+            return md5(key.encode()).hexdigest()
         return key
     try:
         dump = dumps(key, protocol=5)
@@ -105,8 +107,9 @@ class Cache:
     &gt;&gt;&gt; del d[&#34;x&#34;]
     &gt;&gt;&gt; &#34;x&#34; in d
     False
+    &gt;&gt;&gt; d[&#34;any string key longer than 40 characters will be hashed depending if the DBMS backend is used&#34;] = None
     &gt;&gt;&gt; d
-    {&#39;b&#39;: None}
+    {&#39;b&#39;: None, &#39;872d417d62b78366a71ab9fee25f14dc&#39;: None}
     &gt;&gt;&gt; with sopen() as db:
     ...     &#34;x&#34; in db
     ...     db
@@ -117,6 +120,8 @@ class Cache:
     ...     db.x == b&#34;asd&#34;
     ...     del db[&#34;x&#34;]
     ...     &#34;x&#34; in db
+    ...     db[&#34;any string key longer than 40 characters will be hashed depending if the DBMS backend is used&#34;] = None
+    ...     db
     False
     {}
     {&#39;x&#39;: b&#39;asd&#39;}
@@ -124,15 +129,16 @@ class Cache:
     True
     True
     False
+    {&#39;872d417d62b78366a71ab9fee25f14dc&#39;: None}
     &gt;&gt;&gt; d.update({&#34;a&#34;: b&#34;by&#34;})
     &gt;&gt;&gt; d.a
     b&#39;by&#39;
     &gt;&gt;&gt; list(d.keys())
-    [&#39;b&#39;, &#39;a&#39;]
+    [&#39;b&#39;, &#39;872d417d62b78366a71ab9fee25f14dc&#39;, &#39;a&#39;]
     &gt;&gt;&gt; d
-    {&#39;b&#39;: None, &#39;a&#39;: b&#39;by&#39;}
+    {&#39;b&#39;: None, &#39;872d417d62b78366a71ab9fee25f14dc&#39;: None, &#39;a&#39;: b&#39;by&#39;}
     &gt;&gt;&gt; str(d)
-    &#34;{&#39;b&#39;: None, &#39;a&#39;: b&#39;by&#39;}&#34;
+    &#34;{&#39;b&#39;: None, &#39;872d417d62b78366a71ab9fee25f14dc&#39;: None, &#39;a&#39;: b&#39;by&#39;}&#34;
     &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;, autopack=False)
     &gt;&gt;&gt; d[[1,2,&#34;a&#34;]] = b&#34;only bytes when autopack=False&#34;
     &gt;&gt;&gt; d[[1,2,&#34;a&#34;]]
@@ -334,6 +340,8 @@ class WrongKeyType(Exception):
 </summary>
 <pre><code class="python">def check(key):
     if isinstance(key, str):
+        if len(key) &gt; 40:
+            return md5(key.encode()).hexdigest()
         return key
     try:
         dump = dumps(key, protocol=5)
@@ -379,8 +387,9 @@ True
 &gt;&gt;&gt; del d[&quot;x&quot;]
 &gt;&gt;&gt; &quot;x&quot; in d
 False
+&gt;&gt;&gt; d[&quot;any string key longer than 40 characters will be hashed depending if the DBMS backend is used&quot;] = None
 &gt;&gt;&gt; d
-{'b': None}
+{'b': None, '872d417d62b78366a71ab9fee25f14dc': None}
 &gt;&gt;&gt; with sopen() as db:
 ...     &quot;x&quot; in db
 ...     db
@@ -391,6 +400,8 @@ False
 ...     db.x == b&quot;asd&quot;
 ...     del db[&quot;x&quot;]
 ...     &quot;x&quot; in db
+...     db[&quot;any string key longer than 40 characters will be hashed depending if the DBMS backend is used&quot;] = None
+...     db
 False
 {}
 {'x': b'asd'}
@@ -398,15 +409,16 @@ True
 True
 True
 False
+{'872d417d62b78366a71ab9fee25f14dc': None}
 &gt;&gt;&gt; d.update({&quot;a&quot;: b&quot;by&quot;})
 &gt;&gt;&gt; d.a
 b'by'
 &gt;&gt;&gt; list(d.keys())
-['b', 'a']
+['b', '872d417d62b78366a71ab9fee25f14dc', 'a']
 &gt;&gt;&gt; d
-{'b': None, 'a': b'by'}
+{'b': None, '872d417d62b78366a71ab9fee25f14dc': None, 'a': b'by'}
 &gt;&gt;&gt; str(d)
-&quot;{'b': None, 'a': b'by'}&quot;
+&quot;{'b': None, '872d417d62b78366a71ab9fee25f14dc': None, 'a': b'by'}&quot;
 &gt;&gt;&gt; d = Cache(&quot;sqlite+pysqlite:////tmp/sqla-test.db&quot;, autopack=False)
 &gt;&gt;&gt; d[[1,2,&quot;a&quot;]] = b&quot;only bytes when autopack=False&quot;
 &gt;&gt;&gt; d[[1,2,&quot;a&quot;]]
@@ -451,8 +463,9 @@ b'by'
     &gt;&gt;&gt; del d[&#34;x&#34;]
     &gt;&gt;&gt; &#34;x&#34; in d
     False
+    &gt;&gt;&gt; d[&#34;any string key longer than 40 characters will be hashed depending if the DBMS backend is used&#34;] = None
     &gt;&gt;&gt; d
-    {&#39;b&#39;: None}
+    {&#39;b&#39;: None, &#39;872d417d62b78366a71ab9fee25f14dc&#39;: None}
     &gt;&gt;&gt; with sopen() as db:
     ...     &#34;x&#34; in db
     ...     db
@@ -463,6 +476,8 @@ b'by'
     ...     db.x == b&#34;asd&#34;
     ...     del db[&#34;x&#34;]
     ...     &#34;x&#34; in db
+    ...     db[&#34;any string key longer than 40 characters will be hashed depending if the DBMS backend is used&#34;] = None
+    ...     db
     False
     {}
     {&#39;x&#39;: b&#39;asd&#39;}
@@ -470,15 +485,16 @@ b'by'
     True
     True
     False
+    {&#39;872d417d62b78366a71ab9fee25f14dc&#39;: None}
     &gt;&gt;&gt; d.update({&#34;a&#34;: b&#34;by&#34;})
     &gt;&gt;&gt; d.a
     b&#39;by&#39;
     &gt;&gt;&gt; list(d.keys())
-    [&#39;b&#39;, &#39;a&#39;]
+    [&#39;b&#39;, &#39;872d417d62b78366a71ab9fee25f14dc&#39;, &#39;a&#39;]
     &gt;&gt;&gt; d
-    {&#39;b&#39;: None, &#39;a&#39;: b&#39;by&#39;}
+    {&#39;b&#39;: None, &#39;872d417d62b78366a71ab9fee25f14dc&#39;: None, &#39;a&#39;: b&#39;by&#39;}
     &gt;&gt;&gt; str(d)
-    &#34;{&#39;b&#39;: None, &#39;a&#39;: b&#39;by&#39;}&#34;
+    &#34;{&#39;b&#39;: None, &#39;872d417d62b78366a71ab9fee25f14dc&#39;: None, &#39;a&#39;: b&#39;by&#39;}&#34;
     &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;, autopack=False)
     &gt;&gt;&gt; d[[1,2,&#34;a&#34;]] = b&#34;only bytes when autopack=False&#34;
     &gt;&gt;&gt; d[[1,2,&#34;a&#34;]]
