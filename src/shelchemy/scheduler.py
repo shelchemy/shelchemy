@@ -24,23 +24,23 @@ class Scheduler:
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    'a' is new, started
+    'a' is new, starting
     Processing a
     a processed!
     'a' done
-    'b' is new, started
+    'b' is new, starting
     Processing b
     b processed!
     'b' done
-    'c' is new, started
+    'c' is new, starting
     Processing c
     c processed!
     'c' done
-    'd' is new, started
+    'd' is new, starting
     Processing d
     d processed!
     'd' done
-    'e' is new, started
+    'e' is new, starting
     Processing e
     e processed!
     'e' done

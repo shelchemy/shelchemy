@@ -8,6 +8,7 @@ echo; echo
 echo
 echo "----------------- testing... -----------------------"
 read -p "press enter"
+rm /tmp/sqla-test.db /tmp/locker.db
 poetry run pytest src tests --cov=src --doctest-modules  --cov-report term-missing
 echo "----------------- tested -----------------------"
 echo; echo

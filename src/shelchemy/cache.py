@@ -38,7 +38,7 @@ def check(key):
     if not isinstance(key, str):
         try:
             dump = dumps(key, protocol=5)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             print(e)
             raise WrongKeyType(f"Key must be string or serializable (pickable), not {type(key)}.", key)
         key = md5(dump).hexdigest()
@@ -99,11 +99,22 @@ class Cache:
     True
     True
     False
+    >>> d.update({"a": b"by"})
+    >>> d.a
+    b'by'
+    >>> list(d.keys())
+    ['92eb5ffee6ae2fec3ad71c777531578f', '0cc175b9c0f1b6a831c399e269772661']
+    >>> d
+    {'92eb5ffee6ae2fec3ad71c777531578f': None, '0cc175b9c0f1b6a831c399e269772661': b'by'}
+    >>> str(d)
+    "{'92eb5ffee6ae2fec3ad71c777531578f': None, '0cc175b9c0f1b6a831c399e269772661': b'by'}"
     >>> d = Cache("sqlite+pysqlite:////tmp/sqla-test.db", autopack=False)
     >>> d[[1,2,"a"]] = b"only bytes when autopack=False"
     >>> d[[1,2,"a"]]
-    b"only bytes when autopack=False"
-    >>>
+    b'only bytes when autopack=False'
+    >>> d.update({"a": b"by"})
+    >>> d.a
+    b'by'
     """
 
     def __init__(
@@ -191,13 +202,11 @@ class Cache:
                 if self.autopack and packing:
                     try:
                         from safeserializer.compression import pack
-                    except ModuleNotFoundError:
+                    except ModuleNotFoundError:  # pragma: no cover
                         raise Exception(
                             "You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy."
                         )
                     v = pack(v, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
-                elif isinstance(v, str):
-                    v = v.encode()
 
                 if self.ondup == "overwrite":
                     session.query(Content).filter_by(id=k).delete()
@@ -219,7 +228,7 @@ class Cache:
             if self.autopack and packing:
                 try:
                     from safeserializer.compression import unpack
-                except ModuleNotFoundError:
+                except ModuleNotFoundError:  # pragma: no cover
                     raise Exception(
                         "You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy."
                     )
@@ -241,7 +250,7 @@ class Cache:
         key_ = check(key)
         if key_ in self:
             return self[key_]
-        return self.__getattribute__(key)
+        return self.__getattribute__(key)  # pragma: no cover
 
     def __len__(self):
         return self.ensure_build(lambda session: session.query(Content).count())
@@ -257,7 +266,7 @@ class Cache:
         return {k: self[k] for k in self}
 
     def copy(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def keys(self):
         return iter(self)

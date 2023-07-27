@@ -35,7 +35,7 @@ def ping(ctx, item, timeout, stop):
     with ctx() as dic:
         while not stop[0]:
             t = timeout / 2
-            if t is None or t == 0:
+            if t == 0:
                 break
             while not stop[0] and t > 0:
                 sleep(min(0.2, t))
@@ -43,11 +43,13 @@ def ping(ctx, item, timeout, stop):
             dic[item] = packb(datetime.now())
 
 
-def alive(val, timeout):
+def alive(val, timeout):  # pragma: no cover
     try:
-        return timeout is not None and datetime.now() < unpackb(val).datetime() + timedelta(seconds=timeout)
+        if timeout is None:
+            return True
+        return datetime.now() < unpackb(val).datetime() + timedelta(seconds=timeout)
     except Exception as e:
-        print(val)
+        print(f"Problematic value: »»»{val}«««")
         print(unpackb(val))
         raise e from None
 
@@ -61,8 +63,6 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     'logstep' is the frequency of printed messages, 'None' means 'no logs'.
     'timeout'=None keeps the job status as 'started' forever if the job never finishes.
 
-    # TODO: improve avoidance of race condition adopting a pre-start "assigned" state
-
     >>> from time import sleep
     >>> names = ["a","b","c","d","e"]
     >>> storage = {}
@@ -70,23 +70,73 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    'a' is new, started
+    'a' is new, starting
     Processing a
     a processed!
     'a' done
-    'b' is new, started
+    'b' is new, starting
     Processing b
     b processed!
     'b' done
-    'c' is new, started
+    'c' is new, starting
     Processing c
     c processed!
     'c' done
-    'd' is new, started
+    'd' is new, starting
     Processing d
     d processed!
     'd' done
-    'e' is new, started
+    'e' is new, starting
+    Processing e
+    e processed!
+    'e' done
+    >>> storage = {}
+    >>> for name in locker(names, dict__url=storage, timeout=0):
+    ...    print(f"Processing {name}")
+    ...    sleep(0.1)
+    ...    print(f"{name} processed!")
+    'a' is new, starting
+    Processing a
+    a processed!
+    'a' done
+    'b' is new, starting
+    Processing b
+    b processed!
+    'b' done
+    'c' is new, starting
+    Processing c
+    c processed!
+    'c' done
+    'd' is new, starting
+    Processing d
+    d processed!
+    'd' done
+    'e' is new, starting
+    Processing e
+    e processed!
+    'e' done
+    >>> storage = {}
+    >>> for name in locker(names, dict__url=storage, timeout=None):
+    ...    print(f"Processing {name}")
+    ...    sleep(0.1)
+    ...    print(f"{name} processed!")
+    'a' is new, starting
+    Processing a
+    a processed!
+    'a' done
+    'b' is new, starting
+    Processing b
+    b processed!
+    'b' done
+    'c' is new, starting
+    Processing c
+    c processed!
+    'c' done
+    'd' is new, starting
+    Processing d
+    d processed!
+    'd' done
+    'e' is new, starting
     Processing e
     e processed!
     'e' done
@@ -101,13 +151,37 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     'c' already done, skipping
     'd' already done, skipping
     'e' already done, skipping
+    >>> for name in locker(names):
+    ...    print(f"Processing {name}")
+    ...    sleep(0.1)
+    ...    print(f"{name} processed!")
+    'a' is new, starting
+    Processing a
+    a processed!
+    'a' done
+    'b' is new, starting
+    Processing b
+    b processed!
+    'b' done
+    'c' is new, starting
+    Processing c
+    c processed!
+    'c' done
+    'd' is new, starting
+    Processing d
+    d processed!
+    'd' done
+    'e' is new, starting
+    Processing e
+    e processed!
+    'e' done
     """
     from shelchemy.cache import Cache
 
     if dict__url is None:
         ctx = partial(shelve.open, "/tmp/locker.db")
     elif isinstance(dict__url, str):
-        from shelchemy.cache import sopen
+        from shelchemy import sopen
 
         ctx = partial(sopen, dict__url, autopack=False)
     elif isinstance(dict__url, (dict, Cache)) and hasattr(dict__url, "__contains__"):
@@ -116,44 +190,43 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
         def ctx():
             yield dict__url
 
-    else:
+    else:  # pragma: no cover
         ctx = dict__url
 
     for c, item in enumerate(iterable):
+        # Try to avoid race condition between checking absence and marking as started.
+        now = packb(datetime.now())
+        sleep((random() + 1) / 1000)  # ~1.5ms
         with ctx() as dic:
-            while True:
-                if item in dic:
-                    val = dic[item]
-                    if val == b"d":
-                        status, action = "already done", "skipping"
-                    elif not alive(val, timeout):
-                        status, action = "expired", "restarted"
-                    else:
-                        status, action = "already started", "skipping"
+            try:
+                ret = dic[item]
+                val = ret
+                if val == b"d":
+                    status, action = "already done", "skipping"
+                elif not alive(val, timeout):
+                    dic[item] = now  # Mark as started, as early as possible.
+                    status, action = "expired", "restarting"
                 else:
-                    status, action = "is new", "started"
-
-                if action == "skipping":
-                    break
-                else:
-                    # Check for race condition.
-                    now = packb(datetime.now())
-                    sleep((random() + 1) / 1000)  # ~1ms
-                    if item not in dic or not alive(dic[item], timeout):
-                        break
+                    status, action = "already started", "skipping"
+            except KeyError:
+                dic[item] = now  # Mark as started, as early as possible.
+                # Wait to see if someone else has taken the job.
+                sleep(5 * (random() + 1) / 1000)  # ~7.5ms
+                status, action = ("just started by other", "skipping") if dic[item] != now else ("is new", "starting")
 
         if logstep is not None and c % logstep == 0:
             print(f"'{item}' {status}, {action}")
         if action != "skipping":
-            with ctx() as dic:
-                # Mark as started, as early as possible.
-                dic[item] = now
-            stop = [False]
-            t = Thread(target=ping, args=(ctx, item, timeout, stop), daemon=True)
-            t.start()
-            yield item
-            stop[0] = True
-            t.join()
+            if timeout is None:
+                yield item
+            else:
+                stop = [False]
+                t = Thread(target=ping, args=(ctx, item, timeout, stop), daemon=True)
+                t.start()
+                yield item
+                stop[0] = True
+                t.join()
+
             with ctx() as dic:
                 dic[item] = b"d"
             if logstep is not None and c % logstep == 0:

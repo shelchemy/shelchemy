@@ -66,7 +66,7 @@ def check(key):
     if not isinstance(key, str):
         try:
             dump = dumps(key, protocol=5)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             print(e)
             raise WrongKeyType(f&#34;Key must be string or serializable (pickable), not {type(key)}.&#34;, key)
         key = md5(dump).hexdigest()
@@ -76,6 +76,7 @@ def check(key):
 
 
 class Cache:
+
     r&#34;&#34;&#34;
     Dict-like persistence based on SQLAlchemy
 
@@ -88,20 +89,27 @@ class Cache:
     &gt;&gt;&gt; from shelchemy import sopen
     &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;)
     &gt;&gt;&gt; d[&#34;x&#34;] = 5
-    &gt;&gt;&gt; d[&#34;x&#34;]
-    5
+    &gt;&gt;&gt; d[&#34;b&#34;] = None
+    &gt;&gt;&gt; d[&#34;x&#34;], d[&#34;b&#34;]
+    (5, None)
+    &gt;&gt;&gt; try:
+    ...     d[&#34;xxx&#34;]
+    ... except KeyError as m:
+    ...     print(m)
+    &#39;f561aaf6ef0bf14d4208bb46a4ccb3ad&#39;
     &gt;&gt;&gt; for k, v in d.items():
     ...     print(k, v)
     9dd4e461268c8034f5c8564e155c67a6 5
+    92eb5ffee6ae2fec3ad71c777531578f None
     &gt;&gt;&gt; &#34;x&#34; in d
     True
     &gt;&gt;&gt; len(d)
-    1
+    2
     &gt;&gt;&gt; del d[&#34;x&#34;]
     &gt;&gt;&gt; &#34;x&#34; in d
     False
     &gt;&gt;&gt; d
-    {}
+    {&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None}
     &gt;&gt;&gt; with sopen() as db:
     ...     &#34;x&#34; in db
     ...     db
@@ -119,6 +127,22 @@ class Cache:
     True
     True
     False
+    &gt;&gt;&gt; d.update({&#34;a&#34;: b&#34;by&#34;})
+    &gt;&gt;&gt; d.a
+    b&#39;by&#39;
+    &gt;&gt;&gt; list(d.keys())
+    [&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;, &#39;0cc175b9c0f1b6a831c399e269772661&#39;]
+    &gt;&gt;&gt; d
+    {&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None, &#39;0cc175b9c0f1b6a831c399e269772661&#39;: b&#39;by&#39;}
+    &gt;&gt;&gt; str(d)
+    &#34;{&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None, &#39;0cc175b9c0f1b6a831c399e269772661&#39;: b&#39;by&#39;}&#34;
+    &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;, autopack=False)
+    &gt;&gt;&gt; d[[1,2,&#34;a&#34;]] = b&#34;only bytes when autopack=False&#34;
+    &gt;&gt;&gt; d[[1,2,&#34;a&#34;]]
+    b&#39;only bytes when autopack=False&#39;
+    &gt;&gt;&gt; d.update({&#34;a&#34;: b&#34;by&#34;})
+    &gt;&gt;&gt; d.a
+    b&#39;by&#39;
     &#34;&#34;&#34;
 
     def __init__(
@@ -133,14 +157,14 @@ class Cache:
                 session_ = Session(engine, autoflush=False)
                 try:
                     yield session_
-                except:
+                except:  # pragma: no cover
                     session_.rollback()
                     raise
                 finally:
                     session_.close()
 
         else:
-            if _engine is None:
+            if _engine is None:  # pragma: no cover
                 raise Exception(f&#34;Missing `_engine` for external non string session.&#34;)
             self._engine = _engine
 
@@ -148,7 +172,7 @@ class Cache:
             def sessionctx():
                 try:
                     yield session
-                except:
+                except:  # pragma: no cover
                     session.rollback()
                     raise
                 finally:
@@ -167,7 +191,7 @@ class Cache:
             except Exception as e:
                 try:
                     Base.metadata.create_all(self._engine)
-                except:
+                except:  # pragma: no cover
                     raise e from None
         return query__f(session)
 
@@ -183,13 +207,11 @@ class Cache:
         if self.autopack and packing:
             try:
                 from safeserializer.compression import pack
-            except ModuleNotFoundError:
+            except ModuleNotFoundError:  # pragma: no cover
                 raise Exception(
                     &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                 )
             value = pack(value, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
-        elif isinstance(value, str):
-            value = value.encode()
 
         def f(session):
             if self.ondup == &#34;overwrite&#34;:
@@ -208,13 +230,11 @@ class Cache:
                 if self.autopack and packing:
                     try:
                         from safeserializer.compression import pack
-                    except ModuleNotFoundError:
+                    except ModuleNotFoundError:  # pragma: no cover
                         raise Exception(
                             &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                         )
                     v = pack(v, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
-                elif isinstance(v, str):
-                    v = v.encode()
 
                 if self.ondup == &#34;overwrite&#34;:
                     session.query(Content).filter_by(id=k).delete()
@@ -229,17 +249,18 @@ class Cache:
         key = check(key)
 
         def f(session):
-            if ret := session.query(Content).get(key):
-                if ret is not None:
-                    ret = ret.blob
-                    if self.autopack and packing:
-                        try:
-                            from safeserializer.compression import unpack
-                        except ModuleNotFoundError:
-                            raise Exception(
-                                &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
-                            )
-                        ret = unpack(ret)
+            ret = session.query(Content).get(key)
+            if ret is None:
+                raise KeyError(key)
+            ret = ret.blob
+            if self.autopack and packing:
+                try:
+                    from safeserializer.compression import unpack
+                except ModuleNotFoundError:  # pragma: no cover
+                    raise Exception(
+                        &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
+                    )
+                ret = unpack(ret)
             return ret
 
         return self.ensure_build(f)
@@ -257,7 +278,7 @@ class Cache:
         key_ = check(key)
         if key_ in self:
             return self[key_]
-        return self.__getattribute__(key)
+        return self.__getattribute__(key)  # pragma: no cover
 
     def __len__(self):
         return self.ensure_build(lambda session: session.query(Content).count())
@@ -273,7 +294,7 @@ class Cache:
         return {k: self[k] for k in self}
 
     def copy(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def keys(self):
         return iter(self)
@@ -318,7 +339,7 @@ class WrongKeyType(Exception):
     if not isinstance(key, str):
         try:
             dump = dumps(key, protocol=5)
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             print(e)
             raise WrongKeyType(f&#34;Key must be string or serializable (pickable), not {type(key)}.&#34;, key)
         key = md5(dump).hexdigest()
@@ -344,20 +365,27 @@ class WrongKeyType(Exception):
 <pre><code class="language-python-repl">&gt;&gt;&gt; from shelchemy import sopen
 &gt;&gt;&gt; d = Cache(&quot;sqlite+pysqlite:////tmp/sqla-test.db&quot;)
 &gt;&gt;&gt; d[&quot;x&quot;] = 5
-&gt;&gt;&gt; d[&quot;x&quot;]
-5
+&gt;&gt;&gt; d[&quot;b&quot;] = None
+&gt;&gt;&gt; d[&quot;x&quot;], d[&quot;b&quot;]
+(5, None)
+&gt;&gt;&gt; try:
+...     d[&quot;xxx&quot;]
+... except KeyError as m:
+...     print(m)
+'f561aaf6ef0bf14d4208bb46a4ccb3ad'
 &gt;&gt;&gt; for k, v in d.items():
 ...     print(k, v)
 9dd4e461268c8034f5c8564e155c67a6 5
+92eb5ffee6ae2fec3ad71c777531578f None
 &gt;&gt;&gt; &quot;x&quot; in d
 True
 &gt;&gt;&gt; len(d)
-1
+2
 &gt;&gt;&gt; del d[&quot;x&quot;]
 &gt;&gt;&gt; &quot;x&quot; in d
 False
 &gt;&gt;&gt; d
-{}
+{'92eb5ffee6ae2fec3ad71c777531578f': None}
 &gt;&gt;&gt; with sopen() as db:
 ...     &quot;x&quot; in db
 ...     db
@@ -375,12 +403,29 @@ True
 True
 True
 False
+&gt;&gt;&gt; d.update({&quot;a&quot;: b&quot;by&quot;})
+&gt;&gt;&gt; d.a
+b'by'
+&gt;&gt;&gt; list(d.keys())
+['92eb5ffee6ae2fec3ad71c777531578f', '0cc175b9c0f1b6a831c399e269772661']
+&gt;&gt;&gt; d
+{'92eb5ffee6ae2fec3ad71c777531578f': None, '0cc175b9c0f1b6a831c399e269772661': b'by'}
+&gt;&gt;&gt; str(d)
+&quot;{'92eb5ffee6ae2fec3ad71c777531578f': None, '0cc175b9c0f1b6a831c399e269772661': b'by'}&quot;
+&gt;&gt;&gt; d = Cache(&quot;sqlite+pysqlite:////tmp/sqla-test.db&quot;, autopack=False)
+&gt;&gt;&gt; d[[1,2,&quot;a&quot;]] = b&quot;only bytes when autopack=False&quot;
+&gt;&gt;&gt; d[[1,2,&quot;a&quot;]]
+b'only bytes when autopack=False'
+&gt;&gt;&gt; d.update({&quot;a&quot;: b&quot;by&quot;})
+&gt;&gt;&gt; d.a
+b'by'
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Cache:
+
     r&#34;&#34;&#34;
     Dict-like persistence based on SQLAlchemy
 
@@ -393,20 +438,27 @@ False
     &gt;&gt;&gt; from shelchemy import sopen
     &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;)
     &gt;&gt;&gt; d[&#34;x&#34;] = 5
-    &gt;&gt;&gt; d[&#34;x&#34;]
-    5
+    &gt;&gt;&gt; d[&#34;b&#34;] = None
+    &gt;&gt;&gt; d[&#34;x&#34;], d[&#34;b&#34;]
+    (5, None)
+    &gt;&gt;&gt; try:
+    ...     d[&#34;xxx&#34;]
+    ... except KeyError as m:
+    ...     print(m)
+    &#39;f561aaf6ef0bf14d4208bb46a4ccb3ad&#39;
     &gt;&gt;&gt; for k, v in d.items():
     ...     print(k, v)
     9dd4e461268c8034f5c8564e155c67a6 5
+    92eb5ffee6ae2fec3ad71c777531578f None
     &gt;&gt;&gt; &#34;x&#34; in d
     True
     &gt;&gt;&gt; len(d)
-    1
+    2
     &gt;&gt;&gt; del d[&#34;x&#34;]
     &gt;&gt;&gt; &#34;x&#34; in d
     False
     &gt;&gt;&gt; d
-    {}
+    {&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None}
     &gt;&gt;&gt; with sopen() as db:
     ...     &#34;x&#34; in db
     ...     db
@@ -424,6 +476,22 @@ False
     True
     True
     False
+    &gt;&gt;&gt; d.update({&#34;a&#34;: b&#34;by&#34;})
+    &gt;&gt;&gt; d.a
+    b&#39;by&#39;
+    &gt;&gt;&gt; list(d.keys())
+    [&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;, &#39;0cc175b9c0f1b6a831c399e269772661&#39;]
+    &gt;&gt;&gt; d
+    {&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None, &#39;0cc175b9c0f1b6a831c399e269772661&#39;: b&#39;by&#39;}
+    &gt;&gt;&gt; str(d)
+    &#34;{&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None, &#39;0cc175b9c0f1b6a831c399e269772661&#39;: b&#39;by&#39;}&#34;
+    &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;, autopack=False)
+    &gt;&gt;&gt; d[[1,2,&#34;a&#34;]] = b&#34;only bytes when autopack=False&#34;
+    &gt;&gt;&gt; d[[1,2,&#34;a&#34;]]
+    b&#39;only bytes when autopack=False&#39;
+    &gt;&gt;&gt; d.update({&#34;a&#34;: b&#34;by&#34;})
+    &gt;&gt;&gt; d.a
+    b&#39;by&#39;
     &#34;&#34;&#34;
 
     def __init__(
@@ -438,14 +506,14 @@ False
                 session_ = Session(engine, autoflush=False)
                 try:
                     yield session_
-                except:
+                except:  # pragma: no cover
                     session_.rollback()
                     raise
                 finally:
                     session_.close()
 
         else:
-            if _engine is None:
+            if _engine is None:  # pragma: no cover
                 raise Exception(f&#34;Missing `_engine` for external non string session.&#34;)
             self._engine = _engine
 
@@ -453,7 +521,7 @@ False
             def sessionctx():
                 try:
                     yield session
-                except:
+                except:  # pragma: no cover
                     session.rollback()
                     raise
                 finally:
@@ -472,7 +540,7 @@ False
             except Exception as e:
                 try:
                     Base.metadata.create_all(self._engine)
-                except:
+                except:  # pragma: no cover
                     raise e from None
         return query__f(session)
 
@@ -488,13 +556,11 @@ False
         if self.autopack and packing:
             try:
                 from safeserializer.compression import pack
-            except ModuleNotFoundError:
+            except ModuleNotFoundError:  # pragma: no cover
                 raise Exception(
                     &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                 )
             value = pack(value, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
-        elif isinstance(value, str):
-            value = value.encode()
 
         def f(session):
             if self.ondup == &#34;overwrite&#34;:
@@ -513,13 +579,11 @@ False
                 if self.autopack and packing:
                     try:
                         from safeserializer.compression import pack
-                    except ModuleNotFoundError:
+                    except ModuleNotFoundError:  # pragma: no cover
                         raise Exception(
                             &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                         )
                     v = pack(v, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
-                elif isinstance(v, str):
-                    v = v.encode()
 
                 if self.ondup == &#34;overwrite&#34;:
                     session.query(Content).filter_by(id=k).delete()
@@ -534,17 +598,18 @@ False
         key = check(key)
 
         def f(session):
-            if ret := session.query(Content).get(key):
-                if ret is not None:
-                    ret = ret.blob
-                    if self.autopack and packing:
-                        try:
-                            from safeserializer.compression import unpack
-                        except ModuleNotFoundError:
-                            raise Exception(
-                                &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
-                            )
-                        ret = unpack(ret)
+            ret = session.query(Content).get(key)
+            if ret is None:
+                raise KeyError(key)
+            ret = ret.blob
+            if self.autopack and packing:
+                try:
+                    from safeserializer.compression import unpack
+                except ModuleNotFoundError:  # pragma: no cover
+                    raise Exception(
+                        &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
+                    )
+                ret = unpack(ret)
             return ret
 
         return self.ensure_build(f)
@@ -562,7 +627,7 @@ False
         key_ = check(key)
         if key_ in self:
             return self[key_]
-        return self.__getattribute__(key)
+        return self.__getattribute__(key)  # pragma: no cover
 
     def __len__(self):
         return self.ensure_build(lambda session: session.query(Content).count())
@@ -578,7 +643,7 @@ False
         return {k: self[k] for k in self}
 
     def copy(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     def keys(self):
         return iter(self)
@@ -614,7 +679,7 @@ def asdict(self):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def copy(self):
-    raise NotImplementedError</code></pre>
+    raise NotImplementedError  # pragma: no cover</code></pre>
 </details>
 </dd>
 <dt id="shelchemy.cache.Cache.ensure_build"><code class="name flex">
@@ -633,7 +698,7 @@ def asdict(self):
         except Exception as e:
             try:
                 Base.metadata.create_all(self._engine)
-            except:
+            except:  # pragma: no cover
                 raise e from None
     return query__f(session)</code></pre>
 </details>
@@ -681,13 +746,11 @@ def asdict(self):
             if self.autopack and packing:
                 try:
                     from safeserializer.compression import pack
-                except ModuleNotFoundError:
+                except ModuleNotFoundError:  # pragma: no cover
                     raise Exception(
                         &#34;You need to install optional packages `safeserializer` and `lz4` to be able to use compression inside shelchemy.&#34;
                     )
                 v = pack(v, ensure_determinism=self.stablepack, unsafe_fallback=not self.safepack)
-            elif isinstance(v, str):
-                v = v.encode()
 
             if self.ondup == &#34;overwrite&#34;:
                 session.query(Content).filter_by(id=k).delete()

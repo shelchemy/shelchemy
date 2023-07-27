@@ -23,6 +23,28 @@
 
 
 def ichunks(items, binsize, asgenerators=True):
+    """
+    >>> for ch in ichunks([1,2,3,4,5], 2):
+    ...     print(list(ch))
+    [1, 2]
+    [3, 4]
+    [5]
+    >>> for ch in ichunks([1,2,3,4,5], 2, asgenerators=False):
+    ...     print(ch)
+    [1, 2]
+    [3, 4]
+    [5]
+
+    Parameters
+    ----------
+    items
+    binsize
+    asgenerators
+
+    Returns
+    -------
+
+    """
     consumed = [0]
     sent = [0]
     it = iter(items)
@@ -45,5 +67,5 @@ def ichunks(items, binsize, asgenerators=True):
         if consumed[0] is None:
             return
         sent[0] += binsize
-        if consumed[0] < sent[0]:
+        if consumed[0] < sent[0]:  # pragma: no cover
             raise Exception("Cannot traverse a chunk before the previous one is consumed.", consumed[0], sent[0])
