@@ -33,7 +33,7 @@ poetry install
 ```
 
 ### Examples
-This library is more usefull when used along with `hdict`.
+This library is more useful when used along with `hdict`.
 Here are some possible usages by itself.
 
 **Scheduling jobs.**
