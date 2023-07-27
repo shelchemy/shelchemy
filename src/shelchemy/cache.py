@@ -115,7 +115,7 @@ class Cache:
     """
 
     def __init__(
-            self, session=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False, _engine=None
+        self, session=memory, ondup="overwrite", autopack=True, safepack=False, stablepack=False, debug=False, _engine=None
     ):
         if isinstance(session, str):
 

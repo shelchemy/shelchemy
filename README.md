@@ -109,7 +109,7 @@ try:
 except KeyError as m:
     print(m)
 """
-'f561aaf6ef0bf14d4208bb46a4ccb3ad'
+'xxx'
 """
 ```
 
@@ -120,9 +120,9 @@ for k, v in d.items():
 print("x" in d)
 """
 aed0339093d97301965a4e23dac3424a b'only bytes when autopack=False'
-0cc175b9c0f1b6a831c399e269772661 b'by'
-9dd4e461268c8034f5c8564e155c67a6 5
-92eb5ffee6ae2fec3ad71c777531578f None
+a b'by'
+x 5
+b None
 True
 """
 ```
@@ -140,7 +140,7 @@ False
 
 print(d)
 """
-{'aed0339093d97301965a4e23dac3424a': b'only bytes when autopack=False', '0cc175b9c0f1b6a831c399e269772661': b'by', '92eb5ffee6ae2fec3ad71c777531578f': None}
+{'aed0339093d97301965a4e23dac3424a': b'only bytes when autopack=False', 'a': b'by', 'b': None}
 """
 ```
 

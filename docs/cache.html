@@ -63,20 +63,17 @@ VT = TypeVar(&#34;VT&#34;)
 
 
 def check(key):
-    if not isinstance(key, str):
-        try:
-            dump = dumps(key, protocol=5)
-        except Exception as e:  # pragma: no cover
-            print(e)
-            raise WrongKeyType(f&#34;Key must be string or serializable (pickable), not {type(key)}.&#34;, key)
-        key = md5(dump).hexdigest()
-    elif len(key) not in [32, 40]:
-        key = md5(key.encode()).hexdigest()
-    return key
+    if isinstance(key, str):
+        return key
+    try:
+        dump = dumps(key, protocol=5)
+    except Exception as e:  # pragma: no cover
+        print(e)
+        raise WrongKeyType(f&#34;Key must be string or serializable (pickable), not {type(key)}.&#34;, key)
+    return md5(dump).hexdigest()
 
 
 class Cache:
-
     r&#34;&#34;&#34;
     Dict-like persistence based on SQLAlchemy
 
@@ -96,11 +93,11 @@ class Cache:
     ...     d[&#34;xxx&#34;]
     ... except KeyError as m:
     ...     print(m)
-    &#39;f561aaf6ef0bf14d4208bb46a4ccb3ad&#39;
+    &#39;xxx&#39;
     &gt;&gt;&gt; for k, v in d.items():
     ...     print(k, v)
-    9dd4e461268c8034f5c8564e155c67a6 5
-    92eb5ffee6ae2fec3ad71c777531578f None
+    x 5
+    b None
     &gt;&gt;&gt; &#34;x&#34; in d
     True
     &gt;&gt;&gt; len(d)
@@ -109,20 +106,20 @@ class Cache:
     &gt;&gt;&gt; &#34;x&#34; in d
     False
     &gt;&gt;&gt; d
-    {&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None}
+    {&#39;b&#39;: None}
     &gt;&gt;&gt; with sopen() as db:
     ...     &#34;x&#34; in db
     ...     db
     ...     db[&#34;x&#34;] = b&#34;asd&#34;
     ...     db
-    ...     db[&#34;9dd4e461268c8034f5c8564e155c67a6&#34;] == b&#34;asd&#34;
+    ...     db[&#34;x&#34;] == b&#34;asd&#34;
     ...     &#34;x&#34; in db
     ...     db.x == b&#34;asd&#34;
     ...     del db[&#34;x&#34;]
     ...     &#34;x&#34; in db
     False
     {}
-    {&#39;9dd4e461268c8034f5c8564e155c67a6&#39;: b&#39;asd&#39;}
+    {&#39;x&#39;: b&#39;asd&#39;}
     True
     True
     True
@@ -131,11 +128,11 @@ class Cache:
     &gt;&gt;&gt; d.a
     b&#39;by&#39;
     &gt;&gt;&gt; list(d.keys())
-    [&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;, &#39;0cc175b9c0f1b6a831c399e269772661&#39;]
+    [&#39;b&#39;, &#39;a&#39;]
     &gt;&gt;&gt; d
-    {&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None, &#39;0cc175b9c0f1b6a831c399e269772661&#39;: b&#39;by&#39;}
+    {&#39;b&#39;: None, &#39;a&#39;: b&#39;by&#39;}
     &gt;&gt;&gt; str(d)
-    &#34;{&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None, &#39;0cc175b9c0f1b6a831c399e269772661&#39;: b&#39;by&#39;}&#34;
+    &#34;{&#39;b&#39;: None, &#39;a&#39;: b&#39;by&#39;}&#34;
     &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;, autopack=False)
     &gt;&gt;&gt; d[[1,2,&#34;a&#34;]] = b&#34;only bytes when autopack=False&#34;
     &gt;&gt;&gt; d[[1,2,&#34;a&#34;]]
@@ -336,16 +333,14 @@ class WrongKeyType(Exception):
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def check(key):
-    if not isinstance(key, str):
-        try:
-            dump = dumps(key, protocol=5)
-        except Exception as e:  # pragma: no cover
-            print(e)
-            raise WrongKeyType(f&#34;Key must be string or serializable (pickable), not {type(key)}.&#34;, key)
-        key = md5(dump).hexdigest()
-    elif len(key) not in [32, 40]:
-        key = md5(key.encode()).hexdigest()
-    return key</code></pre>
+    if isinstance(key, str):
+        return key
+    try:
+        dump = dumps(key, protocol=5)
+    except Exception as e:  # pragma: no cover
+        print(e)
+        raise WrongKeyType(f&#34;Key must be string or serializable (pickable), not {type(key)}.&#34;, key)
+    return md5(dump).hexdigest()</code></pre>
 </details>
 </dd>
 </dl>
@@ -372,11 +367,11 @@ class WrongKeyType(Exception):
 ...     d[&quot;xxx&quot;]
 ... except KeyError as m:
 ...     print(m)
-'f561aaf6ef0bf14d4208bb46a4ccb3ad'
+'xxx'
 &gt;&gt;&gt; for k, v in d.items():
 ...     print(k, v)
-9dd4e461268c8034f5c8564e155c67a6 5
-92eb5ffee6ae2fec3ad71c777531578f None
+x 5
+b None
 &gt;&gt;&gt; &quot;x&quot; in d
 True
 &gt;&gt;&gt; len(d)
@@ -385,20 +380,20 @@ True
 &gt;&gt;&gt; &quot;x&quot; in d
 False
 &gt;&gt;&gt; d
-{'92eb5ffee6ae2fec3ad71c777531578f': None}
+{'b': None}
 &gt;&gt;&gt; with sopen() as db:
 ...     &quot;x&quot; in db
 ...     db
 ...     db[&quot;x&quot;] = b&quot;asd&quot;
 ...     db
-...     db[&quot;9dd4e461268c8034f5c8564e155c67a6&quot;] == b&quot;asd&quot;
+...     db[&quot;x&quot;] == b&quot;asd&quot;
 ...     &quot;x&quot; in db
 ...     db.x == b&quot;asd&quot;
 ...     del db[&quot;x&quot;]
 ...     &quot;x&quot; in db
 False
 {}
-{'9dd4e461268c8034f5c8564e155c67a6': b'asd'}
+{'x': b'asd'}
 True
 True
 True
@@ -407,11 +402,11 @@ False
 &gt;&gt;&gt; d.a
 b'by'
 &gt;&gt;&gt; list(d.keys())
-['92eb5ffee6ae2fec3ad71c777531578f', '0cc175b9c0f1b6a831c399e269772661']
+['b', 'a']
 &gt;&gt;&gt; d
-{'92eb5ffee6ae2fec3ad71c777531578f': None, '0cc175b9c0f1b6a831c399e269772661': b'by'}
+{'b': None, 'a': b'by'}
 &gt;&gt;&gt; str(d)
-&quot;{'92eb5ffee6ae2fec3ad71c777531578f': None, '0cc175b9c0f1b6a831c399e269772661': b'by'}&quot;
+&quot;{'b': None, 'a': b'by'}&quot;
 &gt;&gt;&gt; d = Cache(&quot;sqlite+pysqlite:////tmp/sqla-test.db&quot;, autopack=False)
 &gt;&gt;&gt; d[[1,2,&quot;a&quot;]] = b&quot;only bytes when autopack=False&quot;
 &gt;&gt;&gt; d[[1,2,&quot;a&quot;]]
@@ -425,7 +420,6 @@ b'by'
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class Cache:
-
     r&#34;&#34;&#34;
     Dict-like persistence based on SQLAlchemy
 
@@ -445,11 +439,11 @@ b'by'
     ...     d[&#34;xxx&#34;]
     ... except KeyError as m:
     ...     print(m)
-    &#39;f561aaf6ef0bf14d4208bb46a4ccb3ad&#39;
+    &#39;xxx&#39;
     &gt;&gt;&gt; for k, v in d.items():
     ...     print(k, v)
-    9dd4e461268c8034f5c8564e155c67a6 5
-    92eb5ffee6ae2fec3ad71c777531578f None
+    x 5
+    b None
     &gt;&gt;&gt; &#34;x&#34; in d
     True
     &gt;&gt;&gt; len(d)
@@ -458,20 +452,20 @@ b'by'
     &gt;&gt;&gt; &#34;x&#34; in d
     False
     &gt;&gt;&gt; d
-    {&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None}
+    {&#39;b&#39;: None}
     &gt;&gt;&gt; with sopen() as db:
     ...     &#34;x&#34; in db
     ...     db
     ...     db[&#34;x&#34;] = b&#34;asd&#34;
     ...     db
-    ...     db[&#34;9dd4e461268c8034f5c8564e155c67a6&#34;] == b&#34;asd&#34;
+    ...     db[&#34;x&#34;] == b&#34;asd&#34;
     ...     &#34;x&#34; in db
     ...     db.x == b&#34;asd&#34;
     ...     del db[&#34;x&#34;]
     ...     &#34;x&#34; in db
     False
     {}
-    {&#39;9dd4e461268c8034f5c8564e155c67a6&#39;: b&#39;asd&#39;}
+    {&#39;x&#39;: b&#39;asd&#39;}
     True
     True
     True
@@ -480,11 +474,11 @@ b'by'
     &gt;&gt;&gt; d.a
     b&#39;by&#39;
     &gt;&gt;&gt; list(d.keys())
-    [&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;, &#39;0cc175b9c0f1b6a831c399e269772661&#39;]
+    [&#39;b&#39;, &#39;a&#39;]
     &gt;&gt;&gt; d
-    {&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None, &#39;0cc175b9c0f1b6a831c399e269772661&#39;: b&#39;by&#39;}
+    {&#39;b&#39;: None, &#39;a&#39;: b&#39;by&#39;}
     &gt;&gt;&gt; str(d)
-    &#34;{&#39;92eb5ffee6ae2fec3ad71c777531578f&#39;: None, &#39;0cc175b9c0f1b6a831c399e269772661&#39;: b&#39;by&#39;}&#34;
+    &#34;{&#39;b&#39;: None, &#39;a&#39;: b&#39;by&#39;}&#34;
     &gt;&gt;&gt; d = Cache(&#34;sqlite+pysqlite:////tmp/sqla-test.db&#34;, autopack=False)
     &gt;&gt;&gt; d[[1,2,&#34;a&#34;]] = b&#34;only bytes when autopack=False&#34;
     &gt;&gt;&gt; d[[1,2,&#34;a&#34;]]
