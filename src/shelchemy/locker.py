@@ -40,21 +40,21 @@ def ping(ctx, item, timeout, stop):
             while not stop[0] and t > 0:
                 sleep(min(0.2, t))
                 t -= 0.2
-            dic[item] = packb(datetime.now())
+            dic[item] = packb(datetime.utcnow())
 
 
 def alive(val, timeout):  # pragma: no cover
     try:
         if timeout is None:
             return True
-        return datetime.now() < unpackb(val).datetime() + timedelta(seconds=timeout)
+        return datetime.utcnow() < unpackb(val).datetime() + timedelta(seconds=timeout)
     except Exception as e:
         print(f"Problematic value: »»»{val}«««")
         print(unpackb(val))
         raise e from None
 
 
-def locker(iterable, dict__url=None, timeout=None, logstep=1):
+def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True):
     """
     Generator that skips already processed (or still being processed) items from 'iterable'
 
@@ -62,6 +62,8 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     'dict__url' is a dict-like object or a sqlalchemy url to store and query each item status
     'logstep' is the frequency of printed messages, 'None' means 'no logs'.
     'timeout'=None keeps the job status as 'started' forever if the job never finishes.
+    'mark_as_done'=None  is intended to use the scheduler just to show if a task is being handled at the time.
+                            useful when each task is incremental/resumable.
 
     >>> from time import sleep
     >>> names = ["a","b","c","d","e"]
@@ -195,7 +197,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
 
     for c, item in enumerate(iterable):
         # Try to avoid race condition between checking absence and marking as started.
-        now = packb(datetime.now())
+        now = packb(datetime.utcnow())
         sleep((random() + 1) / 1000)  # ~1.5ms
         with ctx() as dic:
             try:
@@ -215,7 +217,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
                 status, action = ("just started by other", "skipping") if dic[item] != now else ("is new", "starting")
 
         if logstep is not None and c % logstep == 0:
-            print(f"'{item}' {status}, {action}")
+            print(f"{'              ' if action == 'skipping' else datetime.now()} '{item}' {status}, {action}")
         if action != "skipping":
             if timeout is None:
                 yield item
@@ -228,6 +230,10 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
                 t.join()
 
             with ctx() as dic:
-                dic[item] = b"d"
+                if mark_as_done:
+                    dic[item] = b"d"
+                else:
+                    del dic[item]
+
             if logstep is not None and c % logstep == 0:
-                print(f"'{item}' done")
+                print(f"{datetime.now()} '{item}' done")

@@ -1,4 +1,2 @@
-Complete tests
-Fix autopack=False
-Attempt to make race condition near impossible
-Raise KeyError instead of returning None, so None can be used as a value as any other
+Adopt UTC for scheduling and local time for logging
+Add flag `mark_as_done`

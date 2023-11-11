@@ -3,6 +3,10 @@ from dataclasses import dataclass
 from shelchemy.locker import locker
 
 
+# todo: fixed? is there a problem with different timezones? use UTC? use database server time?
+# todo: fixed? add flag to not mark task as done
+# todo: flag `join` to wait for entire loop to finish before proceeding
+
 @dataclass
 class Scheduler:
     """
@@ -13,7 +17,7 @@ class Scheduler:
     'logstep' is the frequency of printed messages, 'None' means 'no logs'.
     'timeout'=None keeps the job status as 'started' forever if the job never finishes.
 
-    # TODO: improve avoidance of race condition adopting a pre-started state
+    # TODO: improve avoidance of race condition adopting a 'pre-started' state
 
     >>> from time import sleep
     >>> names1 = ["a","b"]
@@ -60,6 +64,7 @@ class Scheduler:
     url: str = None
     timeout: float = None
     logstep: int = 1
+    mark_as_done: bool = True
 
     def __post_init__(self):
         self.list_of_iterators = []
@@ -70,4 +75,4 @@ class Scheduler:
 
     def __iter__(self):
         for items in self.list_of_iterators:
-            yield from locker(items, self.url, self.timeout, self.logstep)
+            yield from locker(items, self.url, self.timeout, self.logstep, self.mark_as_done)
