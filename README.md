@@ -58,26 +58,26 @@ for name in Scheduler(storage, timeout=10) << names1 << names2 << names3:
     sleep(0.1)
     print(f"{name} processed!")
 """
-'a' is new, starting
+2023-11-11 19:17:37.467690 'a' is new, starting
 Processing a
 a processed!
-'a' done
-'b' is new, starting
+2023-11-11 19:17:37.668610 'a' done
+2023-11-11 19:17:37.676568 'b' is new, starting
 Processing b
 b processed!
-'b' done
-'c' is new, starting
+2023-11-11 19:17:37.877588 'b' done
+2023-11-11 19:17:37.888312 'c' is new, starting
 Processing c
 c processed!
-'c' done
-'d' is new, starting
+2023-11-11 19:17:38.089207 'c' done
+2023-11-11 19:17:38.099455 'd' is new, starting
 Processing d
 d processed!
-'d' done
-'e' is new, starting
+2023-11-11 19:17:38.300347 'd' done
+2023-11-11 19:17:38.312183 'e' is new, starting
 Processing e
 e processed!
-'e' done
+2023-11-11 19:17:38.513337 'e' done
 """
 ```
 

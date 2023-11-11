@@ -68,21 +68,21 @@ def ping(ctx, item, timeout, stop):
             while not stop[0] and t &gt; 0:
                 sleep(min(0.2, t))
                 t -= 0.2
-            dic[item] = packb(datetime.now())
+            dic[item] = packb(datetime.utcnow())
 
 
 def alive(val, timeout):  # pragma: no cover
     try:
         if timeout is None:
             return True
-        return datetime.now() &lt; unpackb(val).datetime() + timedelta(seconds=timeout)
+        return datetime.utcnow() &lt; unpackb(val).datetime() + timedelta(seconds=timeout)
     except Exception as e:
         print(f&#34;Problematic value: »»»{val}«««&#34;)
         print(unpackb(val))
         raise e from None
 
 
-def locker(iterable, dict__url=None, timeout=None, logstep=1):
+def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True):
     &#34;&#34;&#34;
     Generator that skips already processed (or still being processed) items from &#39;iterable&#39;
 
@@ -90,119 +90,109 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     &#39;dict__url&#39; is a dict-like object or a sqlalchemy url to store and query each item status
     &#39;logstep&#39; is the frequency of printed messages, &#39;None&#39; means &#39;no logs&#39;.
     &#39;timeout&#39;=None keeps the job status as &#39;started&#39; forever if the job never finishes.
+    &#39;mark_as_done&#39;=None  is intended to use the scheduler just to show if a task is being handled at the time.
+                            useful when each task is incremental/resumable.
 
     &gt;&gt;&gt; from time import sleep
     &gt;&gt;&gt; names = [&#34;a&#34;,&#34;b&#34;,&#34;c&#34;,&#34;d&#34;,&#34;e&#34;]
     &gt;&gt;&gt; storage = {}
-    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):
+    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):  # doctest:+ELLIPSIS
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; is new, starting
+    20... &#39;a&#39; is new, starting
     Processing a
     a processed!
-    &#39;a&#39; done
-    &#39;b&#39; is new, starting
+    20... &#39;a&#39; done
+    20... &#39;b&#39; is new, starting
     Processing b
     b processed!
-    &#39;b&#39; done
-    &#39;c&#39; is new, starting
+    20... &#39;b&#39; done
+    20... &#39;c&#39; is new, starting
     Processing c
     c processed!
-    &#39;c&#39; done
-    &#39;d&#39; is new, starting
+    20... &#39;c&#39; done
+    20... &#39;d&#39; is new, starting
     Processing d
     d processed!
-    &#39;d&#39; done
-    &#39;e&#39; is new, starting
+    20... &#39;d&#39; done
+    20... &#39;e&#39; is new, starting
     Processing e
     e processed!
-    &#39;e&#39; done
+    20... &#39;e&#39; done
     &gt;&gt;&gt; storage = {}
-    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=0):
+    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=0, logstep=4):  # doctest:+ELLIPSIS
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; is new, starting
+    20... &#39;a&#39; is new, starting
     Processing a
     a processed!
-    &#39;a&#39; done
-    &#39;b&#39; is new, starting
+    20... &#39;a&#39; done
     Processing b
     b processed!
-    &#39;b&#39; done
-    &#39;c&#39; is new, starting
     Processing c
     c processed!
-    &#39;c&#39; done
-    &#39;d&#39; is new, starting
     Processing d
     d processed!
-    &#39;d&#39; done
-    &#39;e&#39; is new, starting
+    20... &#39;e&#39; is new, starting
     Processing e
     e processed!
-    &#39;e&#39; done
+    20... &#39;e&#39; done
     &gt;&gt;&gt; storage = {}
-    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=None):
+    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=None, logstep=4):  # doctest:+ELLIPSIS
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; is new, starting
+    20... &#39;a&#39; is new, starting
     Processing a
     a processed!
-    &#39;a&#39; done
-    &#39;b&#39; is new, starting
+    20... &#39;a&#39; done
     Processing b
     b processed!
-    &#39;b&#39; done
-    &#39;c&#39; is new, starting
     Processing c
     c processed!
-    &#39;c&#39; done
-    &#39;d&#39; is new, starting
     Processing d
     d processed!
-    &#39;d&#39; done
-    &#39;e&#39; is new, starting
+    20... &#39;e&#39; is new, starting
     Processing e
     e processed!
-    &#39;e&#39; done
+    20... &#39;e&#39; done
     &gt;&gt;&gt; storage
     {&#39;a&#39;: b&#39;d&#39;, &#39;b&#39;: b&#39;d&#39;, &#39;c&#39;: b&#39;d&#39;, &#39;d&#39;: b&#39;d&#39;, &#39;e&#39;: b&#39;d&#39;}
     &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=1):
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; already done, skipping
-    &#39;b&#39; already done, skipping
-    &#39;c&#39; already done, skipping
-    &#39;d&#39; already done, skipping
-    &#39;e&#39; already done, skipping
-    &gt;&gt;&gt; for name in locker(names):
+                               &#39;a&#39; already done, skipping
+                               &#39;b&#39; already done, skipping
+                               &#39;c&#39; already done, skipping
+                               &#39;d&#39; already done, skipping
+                               &#39;e&#39; already done, skipping
+    &gt;&gt;&gt; for name in locker(names):  # doctest:+ELLIPSIS
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; is new, starting
+    20... &#39;a&#39; is new, starting
     Processing a
     a processed!
-    &#39;a&#39; done
-    &#39;b&#39; is new, starting
+    20... &#39;a&#39; done
+    20... &#39;b&#39; is new, starting
     Processing b
     b processed!
-    &#39;b&#39; done
-    &#39;c&#39; is new, starting
+    20... &#39;b&#39; done
+    20... &#39;c&#39; is new, starting
     Processing c
     c processed!
-    &#39;c&#39; done
-    &#39;d&#39; is new, starting
+    20... &#39;c&#39; done
+    20... &#39;d&#39; is new, starting
     Processing d
     d processed!
-    &#39;d&#39; done
-    &#39;e&#39; is new, starting
+    20... &#39;d&#39; done
+    20... &#39;e&#39; is new, starting
     Processing e
     e processed!
-    &#39;e&#39; done
+    20... &#39;e&#39; done
     &#34;&#34;&#34;
     from shelchemy.cache import Cache
 
@@ -223,7 +213,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
 
     for c, item in enumerate(iterable):
         # Try to avoid race condition between checking absence and marking as started.
-        now = packb(datetime.now())
+        now = packb(datetime.utcnow())
         sleep((random() + 1) / 1000)  # ~1.5ms
         with ctx() as dic:
             try:
@@ -243,7 +233,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
                 status, action = (&#34;just started by other&#34;, &#34;skipping&#34;) if dic[item] != now else (&#34;is new&#34;, &#34;starting&#34;)
 
         if logstep is not None and c % logstep == 0:
-            print(f&#34;&#39;{item}&#39; {status}, {action}&#34;)
+            print(f&#34;{&#39;                          &#39; if action == &#39;skipping&#39; else datetime.now()} &#39;{item}&#39; {status}, {action}&#34;)
         if action != &#34;skipping&#34;:
             if timeout is None:
                 yield item
@@ -256,9 +246,13 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
                 t.join()
 
             with ctx() as dic:
-                dic[item] = b&#34;d&#34;
+                if mark_as_done:
+                    dic[item] = b&#34;d&#34;
+                else:
+                    del dic[item]
+
             if logstep is not None and c % logstep == 0:
-                print(f&#34;&#39;{item}&#39; done&#34;)</code></pre>
+                print(f&#34;{datetime.now()} &#39;{item}&#39; done&#34;)</code></pre>
 </details>
 </section>
 <section>
@@ -281,7 +275,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
     try:
         if timeout is None:
             return True
-        return datetime.now() &lt; unpackb(val).datetime() + timedelta(seconds=timeout)
+        return datetime.utcnow() &lt; unpackb(val).datetime() + timedelta(seconds=timeout)
     except Exception as e:
         print(f&#34;Problematic value: »»»{val}«««&#34;)
         print(unpackb(val))
@@ -289,132 +283,123 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1):
 </details>
 </dd>
 <dt id="shelchemy.locker.locker"><code class="name flex">
-<span>def <span class="ident">locker</span></span>(<span>iterable, dict__url=None, timeout=None, logstep=1)</span>
+<span>def <span class="ident">locker</span></span>(<span>iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generator that skips already processed (or still being processed) items from 'iterable'</p>
 <p>Item processing is restarted if 'timeout' expires.
 'dict__url' is a dict-like object or a sqlalchemy url to store and query each item status
 'logstep' is the frequency of printed messages, 'None' means 'no logs'.
-'timeout'=None keeps the job status as 'started' forever if the job never finishes.</p>
+'timeout'=None keeps the job status as 'started' forever if the job never finishes.
+'mark_as_done'=None
+is intended to use the scheduler just to show if a task is being handled at the time.
+useful when each task is incremental/resumable.</p>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from time import sleep
 &gt;&gt;&gt; names = [&quot;a&quot;,&quot;b&quot;,&quot;c&quot;,&quot;d&quot;,&quot;e&quot;]
 &gt;&gt;&gt; storage = {}
-&gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):
+&gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):  # doctest:+ELLIPSIS
 ...    print(f&quot;Processing {name}&quot;)
 ...    sleep(0.1)
 ...    print(f&quot;{name} processed!&quot;)
-'a' is new, starting
+20... 'a' is new, starting
 Processing a
 a processed!
-'a' done
-'b' is new, starting
+20... 'a' done
+20... 'b' is new, starting
 Processing b
 b processed!
-'b' done
-'c' is new, starting
+20... 'b' done
+20... 'c' is new, starting
 Processing c
 c processed!
-'c' done
-'d' is new, starting
+20... 'c' done
+20... 'd' is new, starting
 Processing d
 d processed!
-'d' done
-'e' is new, starting
+20... 'd' done
+20... 'e' is new, starting
 Processing e
 e processed!
-'e' done
+20... 'e' done
 &gt;&gt;&gt; storage = {}
-&gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=0):
+&gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=0, logstep=4):  # doctest:+ELLIPSIS
 ...    print(f&quot;Processing {name}&quot;)
 ...    sleep(0.1)
 ...    print(f&quot;{name} processed!&quot;)
-'a' is new, starting
+20... 'a' is new, starting
 Processing a
 a processed!
-'a' done
-'b' is new, starting
+20... 'a' done
 Processing b
 b processed!
-'b' done
-'c' is new, starting
 Processing c
 c processed!
-'c' done
-'d' is new, starting
 Processing d
 d processed!
-'d' done
-'e' is new, starting
+20... 'e' is new, starting
 Processing e
 e processed!
-'e' done
+20... 'e' done
 &gt;&gt;&gt; storage = {}
-&gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=None):
+&gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=None, logstep=4):  # doctest:+ELLIPSIS
 ...    print(f&quot;Processing {name}&quot;)
 ...    sleep(0.1)
 ...    print(f&quot;{name} processed!&quot;)
-'a' is new, starting
+20... 'a' is new, starting
 Processing a
 a processed!
-'a' done
-'b' is new, starting
+20... 'a' done
 Processing b
 b processed!
-'b' done
-'c' is new, starting
 Processing c
 c processed!
-'c' done
-'d' is new, starting
 Processing d
 d processed!
-'d' done
-'e' is new, starting
+20... 'e' is new, starting
 Processing e
 e processed!
-'e' done
+20... 'e' done
 &gt;&gt;&gt; storage
 {'a': b'd', 'b': b'd', 'c': b'd', 'd': b'd', 'e': b'd'}
 &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=1):
 ...    print(f&quot;Processing {name}&quot;)
 ...    sleep(0.1)
 ...    print(f&quot;{name} processed!&quot;)
-'a' already done, skipping
-'b' already done, skipping
-'c' already done, skipping
-'d' already done, skipping
-'e' already done, skipping
-&gt;&gt;&gt; for name in locker(names):
+                           'a' already done, skipping
+                           'b' already done, skipping
+                           'c' already done, skipping
+                           'd' already done, skipping
+                           'e' already done, skipping
+&gt;&gt;&gt; for name in locker(names):  # doctest:+ELLIPSIS
 ...    print(f&quot;Processing {name}&quot;)
 ...    sleep(0.1)
 ...    print(f&quot;{name} processed!&quot;)
-'a' is new, starting
+20... 'a' is new, starting
 Processing a
 a processed!
-'a' done
-'b' is new, starting
+20... 'a' done
+20... 'b' is new, starting
 Processing b
 b processed!
-'b' done
-'c' is new, starting
+20... 'b' done
+20... 'c' is new, starting
 Processing c
 c processed!
-'c' done
-'d' is new, starting
+20... 'c' done
+20... 'd' is new, starting
 Processing d
 d processed!
-'d' done
-'e' is new, starting
+20... 'd' done
+20... 'e' is new, starting
 Processing e
 e processed!
-'e' done
+20... 'e' done
 </code></pre></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def locker(iterable, dict__url=None, timeout=None, logstep=1):
+<pre><code class="python">def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True):
     &#34;&#34;&#34;
     Generator that skips already processed (or still being processed) items from &#39;iterable&#39;
 
@@ -422,119 +407,109 @@ e processed!
     &#39;dict__url&#39; is a dict-like object or a sqlalchemy url to store and query each item status
     &#39;logstep&#39; is the frequency of printed messages, &#39;None&#39; means &#39;no logs&#39;.
     &#39;timeout&#39;=None keeps the job status as &#39;started&#39; forever if the job never finishes.
+    &#39;mark_as_done&#39;=None  is intended to use the scheduler just to show if a task is being handled at the time.
+                            useful when each task is incremental/resumable.
 
     &gt;&gt;&gt; from time import sleep
     &gt;&gt;&gt; names = [&#34;a&#34;,&#34;b&#34;,&#34;c&#34;,&#34;d&#34;,&#34;e&#34;]
     &gt;&gt;&gt; storage = {}
-    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):
+    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=10):  # doctest:+ELLIPSIS
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; is new, starting
+    20... &#39;a&#39; is new, starting
     Processing a
     a processed!
-    &#39;a&#39; done
-    &#39;b&#39; is new, starting
+    20... &#39;a&#39; done
+    20... &#39;b&#39; is new, starting
     Processing b
     b processed!
-    &#39;b&#39; done
-    &#39;c&#39; is new, starting
+    20... &#39;b&#39; done
+    20... &#39;c&#39; is new, starting
     Processing c
     c processed!
-    &#39;c&#39; done
-    &#39;d&#39; is new, starting
+    20... &#39;c&#39; done
+    20... &#39;d&#39; is new, starting
     Processing d
     d processed!
-    &#39;d&#39; done
-    &#39;e&#39; is new, starting
+    20... &#39;d&#39; done
+    20... &#39;e&#39; is new, starting
     Processing e
     e processed!
-    &#39;e&#39; done
+    20... &#39;e&#39; done
     &gt;&gt;&gt; storage = {}
-    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=0):
+    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=0, logstep=4):  # doctest:+ELLIPSIS
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; is new, starting
+    20... &#39;a&#39; is new, starting
     Processing a
     a processed!
-    &#39;a&#39; done
-    &#39;b&#39; is new, starting
+    20... &#39;a&#39; done
     Processing b
     b processed!
-    &#39;b&#39; done
-    &#39;c&#39; is new, starting
     Processing c
     c processed!
-    &#39;c&#39; done
-    &#39;d&#39; is new, starting
     Processing d
     d processed!
-    &#39;d&#39; done
-    &#39;e&#39; is new, starting
+    20... &#39;e&#39; is new, starting
     Processing e
     e processed!
-    &#39;e&#39; done
+    20... &#39;e&#39; done
     &gt;&gt;&gt; storage = {}
-    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=None):
+    &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=None, logstep=4):  # doctest:+ELLIPSIS
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; is new, starting
+    20... &#39;a&#39; is new, starting
     Processing a
     a processed!
-    &#39;a&#39; done
-    &#39;b&#39; is new, starting
+    20... &#39;a&#39; done
     Processing b
     b processed!
-    &#39;b&#39; done
-    &#39;c&#39; is new, starting
     Processing c
     c processed!
-    &#39;c&#39; done
-    &#39;d&#39; is new, starting
     Processing d
     d processed!
-    &#39;d&#39; done
-    &#39;e&#39; is new, starting
+    20... &#39;e&#39; is new, starting
     Processing e
     e processed!
-    &#39;e&#39; done
+    20... &#39;e&#39; done
     &gt;&gt;&gt; storage
     {&#39;a&#39;: b&#39;d&#39;, &#39;b&#39;: b&#39;d&#39;, &#39;c&#39;: b&#39;d&#39;, &#39;d&#39;: b&#39;d&#39;, &#39;e&#39;: b&#39;d&#39;}
     &gt;&gt;&gt; for name in locker(names, dict__url=storage, timeout=1):
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; already done, skipping
-    &#39;b&#39; already done, skipping
-    &#39;c&#39; already done, skipping
-    &#39;d&#39; already done, skipping
-    &#39;e&#39; already done, skipping
-    &gt;&gt;&gt; for name in locker(names):
+                               &#39;a&#39; already done, skipping
+                               &#39;b&#39; already done, skipping
+                               &#39;c&#39; already done, skipping
+                               &#39;d&#39; already done, skipping
+                               &#39;e&#39; already done, skipping
+    &gt;&gt;&gt; for name in locker(names):  # doctest:+ELLIPSIS
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; is new, starting
+    20... &#39;a&#39; is new, starting
     Processing a
     a processed!
-    &#39;a&#39; done
-    &#39;b&#39; is new, starting
+    20... &#39;a&#39; done
+    20... &#39;b&#39; is new, starting
     Processing b
     b processed!
-    &#39;b&#39; done
-    &#39;c&#39; is new, starting
+    20... &#39;b&#39; done
+    20... &#39;c&#39; is new, starting
     Processing c
     c processed!
-    &#39;c&#39; done
-    &#39;d&#39; is new, starting
+    20... &#39;c&#39; done
+    20... &#39;d&#39; is new, starting
     Processing d
     d processed!
-    &#39;d&#39; done
-    &#39;e&#39; is new, starting
+    20... &#39;d&#39; done
+    20... &#39;e&#39; is new, starting
     Processing e
     e processed!
-    &#39;e&#39; done
+    20... &#39;e&#39; done
     &#34;&#34;&#34;
     from shelchemy.cache import Cache
 
@@ -555,7 +530,7 @@ e processed!
 
     for c, item in enumerate(iterable):
         # Try to avoid race condition between checking absence and marking as started.
-        now = packb(datetime.now())
+        now = packb(datetime.utcnow())
         sleep((random() + 1) / 1000)  # ~1.5ms
         with ctx() as dic:
             try:
@@ -575,7 +550,7 @@ e processed!
                 status, action = (&#34;just started by other&#34;, &#34;skipping&#34;) if dic[item] != now else (&#34;is new&#34;, &#34;starting&#34;)
 
         if logstep is not None and c % logstep == 0:
-            print(f&#34;&#39;{item}&#39; {status}, {action}&#34;)
+            print(f&#34;{&#39;                          &#39; if action == &#39;skipping&#39; else datetime.now()} &#39;{item}&#39; {status}, {action}&#34;)
         if action != &#34;skipping&#34;:
             if timeout is None:
                 yield item
@@ -588,9 +563,13 @@ e processed!
                 t.join()
 
             with ctx() as dic:
-                dic[item] = b&#34;d&#34;
+                if mark_as_done:
+                    dic[item] = b&#34;d&#34;
+                else:
+                    del dic[item]
+
             if logstep is not None and c % logstep == 0:
-                print(f&#34;&#39;{item}&#39; done&#34;)</code></pre>
+                print(f&#34;{datetime.now()} &#39;{item}&#39; done&#34;)</code></pre>
 </details>
 </dd>
 <dt id="shelchemy.locker.ping"><code class="name flex">
@@ -611,7 +590,7 @@ e processed!
             while not stop[0] and t &gt; 0:
                 sleep(min(0.2, t))
                 t -= 0.2
-            dic[item] = packb(datetime.now())</code></pre>
+            dic[item] = packb(datetime.utcnow())</code></pre>
 </details>
 </dd>
 <dt id="shelchemy.locker.random"><code class="name flex">

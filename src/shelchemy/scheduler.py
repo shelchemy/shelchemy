@@ -7,6 +7,7 @@ from shelchemy.locker import locker
 # todo: fixed? add flag to not mark task as done
 # todo: flag `join` to wait for entire loop to finish before proceeding
 
+
 @dataclass
 class Scheduler:
     """
@@ -24,41 +25,70 @@ class Scheduler:
     >>> names2 = ["c"]
     >>> names3 = ["d","e"]
     >>> storage = {}
-    >>> for name in Scheduler(storage, timeout=10) << names1 << names2 << names3:
+    >>> for name in Scheduler(storage, timeout=10) << names1 << names2 << names3:  # doctest:+ELLIPSIS
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    'a' is new, starting
+    20... 'a' is new, starting
     Processing a
     a processed!
-    'a' done
-    'b' is new, starting
+    20... 'a' done
+    20... 'b' is new, starting
     Processing b
     b processed!
-    'b' done
-    'c' is new, starting
+    20... 'b' done
+    20... 'c' is new, starting
     Processing c
     c processed!
-    'c' done
-    'd' is new, starting
+    20... 'c' done
+    20... 'd' is new, starting
     Processing d
     d processed!
-    'd' done
-    'e' is new, starting
+    20... 'd' done
+    20... 'e' is new, starting
     Processing e
     e processed!
-    'e' done
+    20... 'e' done
     >>> storage
     {'a': b'd', 'b': b'd', 'c': b'd', 'd': b'd', 'e': b'd'}
     >>> for name in Scheduler(storage, timeout=10) << names1 << names2 << names3:
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    'a' already done, skipping
-    'b' already done, skipping
-    'c' already done, skipping
-    'd' already done, skipping
-    'e' already done, skipping
+                               'a' already done, skipping
+                               'b' already done, skipping
+                               'c' already done, skipping
+                               'd' already done, skipping
+                               'e' already done, skipping
+    >>> print(storage.keys())
+    dict_keys(['a', 'b', 'c', 'd', 'e'])
+    >>> storage = {}
+    >>> for name in Scheduler(storage, timeout=10, mark_as_done=False) << names1 << names2 << names3:  # doctest:+ELLIPSIS
+    ...    print(f"Processing {name}")
+    ...    sleep(0.1)
+    ...    print(f"{name} processed!")
+    20... 'a' is new, starting
+    Processing a
+    a processed!
+    20... 'a' done
+    20... 'b' is new, starting
+    Processing b
+    b processed!
+    20... 'b' done
+    20... 'c' is new, starting
+    Processing c
+    c processed!
+    20... 'c' done
+    20... 'd' is new, starting
+    Processing d
+    d processed!
+    20... 'd' done
+    20... 'e' is new, starting
+    Processing e
+    e processed!
+    20... 'e' done
+    >>> print(storage.keys())
+    dict_keys([])
     """
 
     url: str = None

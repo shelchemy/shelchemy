@@ -31,6 +31,11 @@
 from shelchemy.locker import locker
 
 
+# todo: fixed? is there a problem with different timezones? use UTC? use database server time?
+# todo: fixed? add flag to not mark task as done
+# todo: flag `join` to wait for entire loop to finish before proceeding
+
+
 @dataclass
 class Scheduler:
     &#34;&#34;&#34;
@@ -41,53 +46,83 @@ class Scheduler:
     &#39;logstep&#39; is the frequency of printed messages, &#39;None&#39; means &#39;no logs&#39;.
     &#39;timeout&#39;=None keeps the job status as &#39;started&#39; forever if the job never finishes.
 
-    # TODO: improve avoidance of race condition adopting a pre-started state
+    # TODO: improve avoidance of race condition adopting a &#39;pre-started&#39; state
 
     &gt;&gt;&gt; from time import sleep
     &gt;&gt;&gt; names1 = [&#34;a&#34;,&#34;b&#34;]
     &gt;&gt;&gt; names2 = [&#34;c&#34;]
     &gt;&gt;&gt; names3 = [&#34;d&#34;,&#34;e&#34;]
     &gt;&gt;&gt; storage = {}
-    &gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
+    &gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:  # doctest:+ELLIPSIS
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; is new, starting
+    20... &#39;a&#39; is new, starting
     Processing a
     a processed!
-    &#39;a&#39; done
-    &#39;b&#39; is new, starting
+    20... &#39;a&#39; done
+    20... &#39;b&#39; is new, starting
     Processing b
     b processed!
-    &#39;b&#39; done
-    &#39;c&#39; is new, starting
+    20... &#39;b&#39; done
+    20... &#39;c&#39; is new, starting
     Processing c
     c processed!
-    &#39;c&#39; done
-    &#39;d&#39; is new, starting
+    20... &#39;c&#39; done
+    20... &#39;d&#39; is new, starting
     Processing d
     d processed!
-    &#39;d&#39; done
-    &#39;e&#39; is new, starting
+    20... &#39;d&#39; done
+    20... &#39;e&#39; is new, starting
     Processing e
     e processed!
-    &#39;e&#39; done
+    20... &#39;e&#39; done
     &gt;&gt;&gt; storage
     {&#39;a&#39;: b&#39;d&#39;, &#39;b&#39;: b&#39;d&#39;, &#39;c&#39;: b&#39;d&#39;, &#39;d&#39;: b&#39;d&#39;, &#39;e&#39;: b&#39;d&#39;}
     &gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; already done, skipping
-    &#39;b&#39; already done, skipping
-    &#39;c&#39; already done, skipping
-    &#39;d&#39; already done, skipping
-    &#39;e&#39; already done, skipping
+                               &#39;a&#39; already done, skipping
+                               &#39;b&#39; already done, skipping
+                               &#39;c&#39; already done, skipping
+                               &#39;d&#39; already done, skipping
+                               &#39;e&#39; already done, skipping
+    &gt;&gt;&gt; print(storage.keys())
+    dict_keys([&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;])
+    &gt;&gt;&gt; storage = {}
+    &gt;&gt;&gt; for name in Scheduler(storage, timeout=10, mark_as_done=False) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:  # doctest:+ELLIPSIS
+    ...    print(f&#34;Processing {name}&#34;)
+    ...    sleep(0.1)
+    ...    print(f&#34;{name} processed!&#34;)
+    20... &#39;a&#39; is new, starting
+    Processing a
+    a processed!
+    20... &#39;a&#39; done
+    20... &#39;b&#39; is new, starting
+    Processing b
+    b processed!
+    20... &#39;b&#39; done
+    20... &#39;c&#39; is new, starting
+    Processing c
+    c processed!
+    20... &#39;c&#39; done
+    20... &#39;d&#39; is new, starting
+    Processing d
+    d processed!
+    20... &#39;d&#39; done
+    20... &#39;e&#39; is new, starting
+    Processing e
+    e processed!
+    20... &#39;e&#39; done
+    &gt;&gt;&gt; print(storage.keys())
+    dict_keys([])
     &#34;&#34;&#34;
 
     url: str = None
     timeout: float = None
     logstep: int = 1
+    mark_as_done: bool = True
 
     def __post_init__(self):
         self.list_of_iterators = []
@@ -98,7 +133,7 @@ class Scheduler:
 
     def __iter__(self):
         for items in self.list_of_iterators:
-            yield from locker(items, self.url, self.timeout, self.logstep)</code></pre>
+            yield from locker(items, self.url, self.timeout, self.logstep, self.mark_as_done)</code></pre>
 </details>
 </section>
 <section>
@@ -112,7 +147,7 @@ class Scheduler:
 <dl>
 <dt id="shelchemy.scheduler.Scheduler"><code class="flex name class">
 <span>class <span class="ident">Scheduler</span></span>
-<span>(</span><span>url: str = None, timeout: float = None, logstep: int = 1)</span>
+<span>(</span><span>url: str = None, timeout: float = None, logstep: int = 1, mark_as_done: bool = True)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generator that skips already processed (or still being processed) items from any lshifted (&lt;&lt;) 'iterable'</p>
@@ -120,47 +155,76 @@ class Scheduler:
 'url' is a sqlalchemy url (or a dict-like object) to use internally to store and query each item status
 'logstep' is the frequency of printed messages, 'None' means 'no logs'.
 'timeout'=None keeps the job status as 'started' forever if the job never finishes.</p>
-<h1 id="todo-improve-avoidance-of-race-condition-adopting-a-pre-started-state">TODO: improve avoidance of race condition adopting a pre-started state</h1>
+<h1 id="todo-improve-avoidance-of-race-condition-adopting-a-pre-started-state">TODO: improve avoidance of race condition adopting a 'pre-started' state</h1>
 <pre><code class="language-python-repl">&gt;&gt;&gt; from time import sleep
 &gt;&gt;&gt; names1 = [&quot;a&quot;,&quot;b&quot;]
 &gt;&gt;&gt; names2 = [&quot;c&quot;]
 &gt;&gt;&gt; names3 = [&quot;d&quot;,&quot;e&quot;]
 &gt;&gt;&gt; storage = {}
-&gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
+&gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:  # doctest:+ELLIPSIS
 ...    print(f&quot;Processing {name}&quot;)
 ...    sleep(0.1)
 ...    print(f&quot;{name} processed!&quot;)
-'a' is new, starting
+20... 'a' is new, starting
 Processing a
 a processed!
-'a' done
-'b' is new, starting
+20... 'a' done
+20... 'b' is new, starting
 Processing b
 b processed!
-'b' done
-'c' is new, starting
+20... 'b' done
+20... 'c' is new, starting
 Processing c
 c processed!
-'c' done
-'d' is new, starting
+20... 'c' done
+20... 'd' is new, starting
 Processing d
 d processed!
-'d' done
-'e' is new, starting
+20... 'd' done
+20... 'e' is new, starting
 Processing e
 e processed!
-'e' done
+20... 'e' done
 &gt;&gt;&gt; storage
 {'a': b'd', 'b': b'd', 'c': b'd', 'd': b'd', 'e': b'd'}
 &gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
 ...    print(f&quot;Processing {name}&quot;)
 ...    sleep(0.1)
 ...    print(f&quot;{name} processed!&quot;)
-'a' already done, skipping
-'b' already done, skipping
-'c' already done, skipping
-'d' already done, skipping
-'e' already done, skipping
+                           'a' already done, skipping
+                           'b' already done, skipping
+                           'c' already done, skipping
+                           'd' already done, skipping
+                           'e' already done, skipping
+&gt;&gt;&gt; print(storage.keys())
+dict_keys(['a', 'b', 'c', 'd', 'e'])
+&gt;&gt;&gt; storage = {}
+&gt;&gt;&gt; for name in Scheduler(storage, timeout=10, mark_as_done=False) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:  # doctest:+ELLIPSIS
+...    print(f&quot;Processing {name}&quot;)
+...    sleep(0.1)
+...    print(f&quot;{name} processed!&quot;)
+20... 'a' is new, starting
+Processing a
+a processed!
+20... 'a' done
+20... 'b' is new, starting
+Processing b
+b processed!
+20... 'b' done
+20... 'c' is new, starting
+Processing c
+c processed!
+20... 'c' done
+20... 'd' is new, starting
+Processing d
+d processed!
+20... 'd' done
+20... 'e' is new, starting
+Processing e
+e processed!
+20... 'e' done
+&gt;&gt;&gt; print(storage.keys())
+dict_keys([])
 </code></pre></div>
 <details class="source">
 <summary>
@@ -176,53 +240,83 @@ class Scheduler:
     &#39;logstep&#39; is the frequency of printed messages, &#39;None&#39; means &#39;no logs&#39;.
     &#39;timeout&#39;=None keeps the job status as &#39;started&#39; forever if the job never finishes.
 
-    # TODO: improve avoidance of race condition adopting a pre-started state
+    # TODO: improve avoidance of race condition adopting a &#39;pre-started&#39; state
 
     &gt;&gt;&gt; from time import sleep
     &gt;&gt;&gt; names1 = [&#34;a&#34;,&#34;b&#34;]
     &gt;&gt;&gt; names2 = [&#34;c&#34;]
     &gt;&gt;&gt; names3 = [&#34;d&#34;,&#34;e&#34;]
     &gt;&gt;&gt; storage = {}
-    &gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
+    &gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:  # doctest:+ELLIPSIS
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; is new, starting
+    20... &#39;a&#39; is new, starting
     Processing a
     a processed!
-    &#39;a&#39; done
-    &#39;b&#39; is new, starting
+    20... &#39;a&#39; done
+    20... &#39;b&#39; is new, starting
     Processing b
     b processed!
-    &#39;b&#39; done
-    &#39;c&#39; is new, starting
+    20... &#39;b&#39; done
+    20... &#39;c&#39; is new, starting
     Processing c
     c processed!
-    &#39;c&#39; done
-    &#39;d&#39; is new, starting
+    20... &#39;c&#39; done
+    20... &#39;d&#39; is new, starting
     Processing d
     d processed!
-    &#39;d&#39; done
-    &#39;e&#39; is new, starting
+    20... &#39;d&#39; done
+    20... &#39;e&#39; is new, starting
     Processing e
     e processed!
-    &#39;e&#39; done
+    20... &#39;e&#39; done
     &gt;&gt;&gt; storage
     {&#39;a&#39;: b&#39;d&#39;, &#39;b&#39;: b&#39;d&#39;, &#39;c&#39;: b&#39;d&#39;, &#39;d&#39;: b&#39;d&#39;, &#39;e&#39;: b&#39;d&#39;}
     &gt;&gt;&gt; for name in Scheduler(storage, timeout=10) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:
     ...    print(f&#34;Processing {name}&#34;)
     ...    sleep(0.1)
     ...    print(f&#34;{name} processed!&#34;)
-    &#39;a&#39; already done, skipping
-    &#39;b&#39; already done, skipping
-    &#39;c&#39; already done, skipping
-    &#39;d&#39; already done, skipping
-    &#39;e&#39; already done, skipping
+                               &#39;a&#39; already done, skipping
+                               &#39;b&#39; already done, skipping
+                               &#39;c&#39; already done, skipping
+                               &#39;d&#39; already done, skipping
+                               &#39;e&#39; already done, skipping
+    &gt;&gt;&gt; print(storage.keys())
+    dict_keys([&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;])
+    &gt;&gt;&gt; storage = {}
+    &gt;&gt;&gt; for name in Scheduler(storage, timeout=10, mark_as_done=False) &lt;&lt; names1 &lt;&lt; names2 &lt;&lt; names3:  # doctest:+ELLIPSIS
+    ...    print(f&#34;Processing {name}&#34;)
+    ...    sleep(0.1)
+    ...    print(f&#34;{name} processed!&#34;)
+    20... &#39;a&#39; is new, starting
+    Processing a
+    a processed!
+    20... &#39;a&#39; done
+    20... &#39;b&#39; is new, starting
+    Processing b
+    b processed!
+    20... &#39;b&#39; done
+    20... &#39;c&#39; is new, starting
+    Processing c
+    c processed!
+    20... &#39;c&#39; done
+    20... &#39;d&#39; is new, starting
+    Processing d
+    d processed!
+    20... &#39;d&#39; done
+    20... &#39;e&#39; is new, starting
+    Processing e
+    e processed!
+    20... &#39;e&#39; done
+    &gt;&gt;&gt; print(storage.keys())
+    dict_keys([])
     &#34;&#34;&#34;
 
     url: str = None
     timeout: float = None
     logstep: int = 1
+    mark_as_done: bool = True
 
     def __post_init__(self):
         self.list_of_iterators = []
@@ -233,11 +327,15 @@ class Scheduler:
 
     def __iter__(self):
         for items in self.list_of_iterators:
-            yield from locker(items, self.url, self.timeout, self.logstep)</code></pre>
+            yield from locker(items, self.url, self.timeout, self.logstep, self.mark_as_done)</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
 <dt id="shelchemy.scheduler.Scheduler.logstep"><code class="name">var <span class="ident">logstep</span> : int</code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="shelchemy.scheduler.Scheduler.mark_as_done"><code class="name">var <span class="ident">mark_as_done</span> : bool</code></dt>
 <dd>
 <div class="desc"></div>
 </dd>
@@ -271,6 +369,7 @@ class Scheduler:
 <h4><code><a title="shelchemy.scheduler.Scheduler" href="#shelchemy.scheduler.Scheduler">Scheduler</a></code></h4>
 <ul class="">
 <li><code><a title="shelchemy.scheduler.Scheduler.logstep" href="#shelchemy.scheduler.Scheduler.logstep">logstep</a></code></li>
+<li><code><a title="shelchemy.scheduler.Scheduler.mark_as_done" href="#shelchemy.scheduler.Scheduler.mark_as_done">mark_as_done</a></code></li>
 <li><code><a title="shelchemy.scheduler.Scheduler.timeout" href="#shelchemy.scheduler.Scheduler.timeout">timeout</a></code></li>
 <li><code><a title="shelchemy.scheduler.Scheduler.url" href="#shelchemy.scheduler.Scheduler.url">url</a></code></li>
 </ul>

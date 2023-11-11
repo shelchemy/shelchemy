@@ -68,115 +68,103 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True)
     >>> from time import sleep
     >>> names = ["a","b","c","d","e"]
     >>> storage = {}
-    >>> for name in locker(names, dict__url=storage, timeout=10):
+    >>> for name in locker(names, dict__url=storage, timeout=10):  # doctest:+ELLIPSIS
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    'a' is new, starting
+    20... 'a' is new, starting
     Processing a
     a processed!
-    'a' done
-    'b' is new, starting
+    20... 'a' done
+    20... 'b' is new, starting
     Processing b
     b processed!
-    'b' done
-    'c' is new, starting
+    20... 'b' done
+    20... 'c' is new, starting
     Processing c
     c processed!
-    'c' done
-    'd' is new, starting
+    20... 'c' done
+    20... 'd' is new, starting
     Processing d
     d processed!
-    'd' done
-    'e' is new, starting
+    20... 'd' done
+    20... 'e' is new, starting
     Processing e
     e processed!
-    'e' done
+    20... 'e' done
     >>> storage = {}
-    >>> for name in locker(names, dict__url=storage, timeout=0):
+    >>> for name in locker(names, dict__url=storage, timeout=0, logstep=4):  # doctest:+ELLIPSIS
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    'a' is new, starting
+    20... 'a' is new, starting
     Processing a
     a processed!
-    'a' done
-    'b' is new, starting
+    20... 'a' done
     Processing b
     b processed!
-    'b' done
-    'c' is new, starting
     Processing c
     c processed!
-    'c' done
-    'd' is new, starting
     Processing d
     d processed!
-    'd' done
-    'e' is new, starting
+    20... 'e' is new, starting
     Processing e
     e processed!
-    'e' done
+    20... 'e' done
     >>> storage = {}
-    >>> for name in locker(names, dict__url=storage, timeout=None):
+    >>> for name in locker(names, dict__url=storage, timeout=None, logstep=4):  # doctest:+ELLIPSIS
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    'a' is new, starting
+    20... 'a' is new, starting
     Processing a
     a processed!
-    'a' done
-    'b' is new, starting
+    20... 'a' done
     Processing b
     b processed!
-    'b' done
-    'c' is new, starting
     Processing c
     c processed!
-    'c' done
-    'd' is new, starting
     Processing d
     d processed!
-    'd' done
-    'e' is new, starting
+    20... 'e' is new, starting
     Processing e
     e processed!
-    'e' done
+    20... 'e' done
     >>> storage
     {'a': b'd', 'b': b'd', 'c': b'd', 'd': b'd', 'e': b'd'}
     >>> for name in locker(names, dict__url=storage, timeout=1):
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    'a' already done, skipping
-    'b' already done, skipping
-    'c' already done, skipping
-    'd' already done, skipping
-    'e' already done, skipping
-    >>> for name in locker(names):
+                               'a' already done, skipping
+                               'b' already done, skipping
+                               'c' already done, skipping
+                               'd' already done, skipping
+                               'e' already done, skipping
+    >>> for name in locker(names):  # doctest:+ELLIPSIS
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    'a' is new, starting
+    20... 'a' is new, starting
     Processing a
     a processed!
-    'a' done
-    'b' is new, starting
+    20... 'a' done
+    20... 'b' is new, starting
     Processing b
     b processed!
-    'b' done
-    'c' is new, starting
+    20... 'b' done
+    20... 'c' is new, starting
     Processing c
     c processed!
-    'c' done
-    'd' is new, starting
+    20... 'c' done
+    20... 'd' is new, starting
     Processing d
     d processed!
-    'd' done
-    'e' is new, starting
+    20... 'd' done
+    20... 'e' is new, starting
     Processing e
     e processed!
-    'e' done
+    20... 'e' done
     """
     from shelchemy.cache import Cache
 
@@ -217,7 +205,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True)
                 status, action = ("just started by other", "skipping") if dic[item] != now else ("is new", "starting")
 
         if logstep is not None and c % logstep == 0:
-            print(f"{'              ' if action == 'skipping' else datetime.now()} '{item}' {status}, {action}")
+            print(f"{'                          ' if action == 'skipping' else datetime.now()} '{item}' {status}, {action}")
         if action != "skipping":
             if timeout is None:
                 yield item
