@@ -95,6 +95,7 @@ class Scheduler:
     timeout: float = None
     logstep: int = 1
     mark_as_done: bool = True
+    autopack_when_url: bool = False
 
     def __post_init__(self):
         self.list_of_iterators = []
@@ -105,4 +106,4 @@ class Scheduler:
 
     def __iter__(self):
         for items in self.list_of_iterators:
-            yield from locker(items, self.url, self.timeout, self.logstep, self.mark_as_done)
+            yield from locker(items, self.url, self.timeout, self.logstep, self.mark_as_done, self.autopack_when_url)
