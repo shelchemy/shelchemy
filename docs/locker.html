@@ -82,7 +82,7 @@ def alive(val, timeout):  # pragma: no cover
         raise e from None
 
 
-def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True):
+def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True, autopack_when_url=False):
     &#34;&#34;&#34;
     Generator that skips already processed (or still being processed) items from &#39;iterable&#39;
 
@@ -201,7 +201,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True)
     elif isinstance(dict__url, str):
         from shelchemy import sopen
 
-        ctx = partial(sopen, dict__url, autopack=False)
+        ctx = partial(sopen, dict__url, autopack=autopack_when_url)
     elif isinstance(dict__url, (dict, Cache)) and hasattr(dict__url, &#34;__contains__&#34;):
 
         @contextmanager
@@ -283,7 +283,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True)
 </details>
 </dd>
 <dt id="shelchemy.locker.locker"><code class="name flex">
-<span>def <span class="ident">locker</span></span>(<span>iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True)</span>
+<span>def <span class="ident">locker</span></span>(<span>iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True, autopack_when_url=False)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Generator that skips already processed (or still being processed) items from 'iterable'</p>
@@ -399,7 +399,7 @@ e processed!
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True):
+<pre><code class="python">def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True, autopack_when_url=False):
     &#34;&#34;&#34;
     Generator that skips already processed (or still being processed) items from &#39;iterable&#39;
 
@@ -518,7 +518,7 @@ e processed!
     elif isinstance(dict__url, str):
         from shelchemy import sopen
 
-        ctx = partial(sopen, dict__url, autopack=False)
+        ctx = partial(sopen, dict__url, autopack=autopack_when_url)
     elif isinstance(dict__url, (dict, Cache)) and hasattr(dict__url, &#34;__contains__&#34;):
 
         @contextmanager

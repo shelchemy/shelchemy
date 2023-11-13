@@ -54,7 +54,7 @@ def alive(val, timeout):  # pragma: no cover
         raise e from None
 
 
-def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True):
+def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True, autopack_when_url=False):
     """
     Generator that skips already processed (or still being processed) items from 'iterable'
 
@@ -173,7 +173,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True)
     elif isinstance(dict__url, str):
         from shelchemy import sopen
 
-        ctx = partial(sopen, dict__url, autopack=False)
+        ctx = partial(sopen, dict__url, autopack=autopack_when_url)
     elif isinstance(dict__url, (dict, Cache)) and hasattr(dict__url, "__contains__"):
 
         @contextmanager

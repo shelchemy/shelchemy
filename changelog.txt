@@ -1,2 +1,1 @@
-Adopt UTC for scheduling and local time for logging
-Add flag `mark_as_done`
+Add flag `autopack_when_url` to enable choice of compression when db is given as a url
