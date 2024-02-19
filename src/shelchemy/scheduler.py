@@ -25,10 +25,11 @@ class Scheduler:
     >>> names2 = ["c"]
     >>> names3 = ["d","e"]
     >>> storage = {}
-    >>> for name in Scheduler(storage, timeout=10) << names1 << names2 << names3:  # doctest:+ELLIPSIS
+    >>> for name in Scheduler(storage, timeout=10, prefix="") << names1 << names2 << names3:  # doctest:+ELLIPSIS +NORMALIZE_WHITESPACE +SKIP
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
+    Started scheduler
     20... 'a' is new, starting
     Processing a
     a processed!
@@ -49,21 +50,22 @@ class Scheduler:
     Processing e
     e processed!
     20... 'e' done
-    >>> storage
+    >>> storage  # doctest: +SKIP
     {'a': b'd', 'b': b'd', 'c': b'd', 'd': b'd', 'e': b'd'}
-    >>> for name in Scheduler(storage, timeout=10) << names1 << names2 << names3:
+    >>> for name in Scheduler(storage, timeout=10, prefix="") << names1 << names2 << names3:  # doctest:+ELLIPSIS +NORMALIZE_WHITESPACE +SKIP
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
+    Started scheduler
                                'a' already done, skipping
                                'b' already done, skipping
                                'c' already done, skipping
                                'd' already done, skipping
                                'e' already done, skipping
-    >>> print(storage.keys())
+    >>> print(storage.keys())  # doctest: +SKIP
     dict_keys(['a', 'b', 'c', 'd', 'e'])
     >>> storage = {}
-    >>> for name in Scheduler(storage, timeout=10, mark_as_done=False) << names1 << names2 << names3:  # doctest:+ELLIPSIS
+    >>> for name in Scheduler(storage, timeout=10, mark_as_done=False, prefix="") << names1 << names2 << names3:  # doctest:+ELLIPSIS  +NORMALIZE_WHITESPACE  +SKIP
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")

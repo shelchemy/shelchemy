@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "shelchemy"
-version = "2.231111.3"
+version = "2.240219.1"
 description = "Shelve-like dict using sqlalchemy as a backend, and lazy scheduler for resuming tasks"
 authors = ["davips <dpsabc@gmail.com>"]
 license = "GPL"
