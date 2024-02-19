@@ -54,7 +54,7 @@ def alive(val, timeout):  # pragma: no cover
         raise e from None
 
 
-def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True, autopack_when_url=False, prefix="\r"):
+def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True, autopack_when_url=False, prefix="\r", suffix=""):
     """
     Generator that skips already processed (or still being processed) items from 'iterable'
 
@@ -72,7 +72,6 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True,
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    Started scheduler
     20... 'a' is new, starting
     Processing a
     a processed!
@@ -98,7 +97,6 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True,
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    Started scheduler
     20... 'a' is new, starting
     Processing a
     a processed!
@@ -118,7 +116,6 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True,
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    Started scheduler
     20... 'a' is new, starting
     Processing a
     a processed!
@@ -139,7 +136,6 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True,
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    Started scheduler
                            'a' already done, skipping
                            'b' already done, skipping
                            'c' already done, skipping
@@ -149,7 +145,6 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True,
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    Started scheduler
     20... 'a' is new, starting
     Processing a
     a processed!
@@ -188,7 +183,6 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True,
     else:  # pragma: no cover
         ctx = dict__url
 
-    print("Started scheduler", flush=True)
     for c, item in enumerate(iterable):
         # Try to avoid race condition between checking absence and marking as started.
         now = packb(datetime.utcnow())
@@ -212,7 +206,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True,
 
         if logstep is not None and c % logstep == 0:
             print(
-                f"{prefix}{'                          ' if action == 'skipping' else datetime.now()} '{item}' {status}, {action}",
+                f"{prefix}{'                          ' if action == 'skipping' else datetime.now()} '{item}' {status}, {action}{suffix}",
                 flush=True,
             )
         if action != "skipping":
@@ -233,4 +227,4 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True,
                     del dic[item]
 
             if logstep is not None and c % logstep == 0:
-                print(f"{prefix}{datetime.now()} '{item}' done", flush=True)
+                print(f"{prefix}{datetime.now()} '{item}' done{suffix}", flush=True)

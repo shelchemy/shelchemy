@@ -25,11 +25,10 @@ class Scheduler:
     >>> names2 = ["c"]
     >>> names3 = ["d","e"]
     >>> storage = {}
-    >>> for name in Scheduler(storage, timeout=10, prefix="") << names1 << names2 << names3:  # doctest:+ELLIPSIS +NORMALIZE_WHITESPACE +SKIP
+    >>> for name in Scheduler(storage, timeout=10, prefix="") << names1 << names2 << names3:  # doctest:+ELLIPSIS +NORMALIZE_WHITESPACE
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    Started scheduler
     20... 'a' is new, starting
     Processing a
     a processed!
@@ -50,22 +49,21 @@ class Scheduler:
     Processing e
     e processed!
     20... 'e' done
-    >>> storage  # doctest: +SKIP
+    >>> storage
     {'a': b'd', 'b': b'd', 'c': b'd', 'd': b'd', 'e': b'd'}
-    >>> for name in Scheduler(storage, timeout=10, prefix="") << names1 << names2 << names3:  # doctest:+ELLIPSIS +NORMALIZE_WHITESPACE +SKIP
+    >>> for name in Scheduler(storage, timeout=10, prefix="") << names1 << names2 << names3:  # doctest:+ELLIPSIS +NORMALIZE_WHITESPACE
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
-    Started scheduler
                                'a' already done, skipping
                                'b' already done, skipping
                                'c' already done, skipping
                                'd' already done, skipping
                                'e' already done, skipping
-    >>> print(storage.keys())  # doctest: +SKIP
+    >>> print(storage.keys())
     dict_keys(['a', 'b', 'c', 'd', 'e'])
     >>> storage = {}
-    >>> for name in Scheduler(storage, timeout=10, mark_as_done=False, prefix="") << names1 << names2 << names3:  # doctest:+ELLIPSIS  +NORMALIZE_WHITESPACE  +SKIP
+    >>> for name in Scheduler(storage, timeout=10, mark_as_done=False, prefix="") << names1 << names2 << names3:  # doctest:+ELLIPSIS  +NORMALIZE_WHITESPACE
     ...    print(f"Processing {name}")
     ...    sleep(0.1)
     ...    print(f"{name} processed!")
@@ -99,6 +97,7 @@ class Scheduler:
     mark_as_done: bool = True
     autopack_when_url: bool = False
     prefix: str = "\r"
+    suffix: str = ""
 
     def __post_init__(self):
         self.list_of_iterators = []
@@ -109,4 +108,6 @@ class Scheduler:
 
     def __iter__(self):
         for items in self.list_of_iterators:
-            yield from locker(items, self.url, self.timeout, self.logstep, self.mark_as_done, self.autopack_when_url)
+            yield from locker(
+                items, self.url, self.timeout, self.logstep, self.mark_as_done, self.autopack_when_url, self.prefix, self.suffix
+            )
