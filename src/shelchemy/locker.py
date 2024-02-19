@@ -49,12 +49,12 @@ def alive(val, timeout):  # pragma: no cover
             return True
         return datetime.utcnow() < unpackb(val).datetime() + timedelta(seconds=timeout)
     except Exception as e:
-        print(f"Problematic value: »»»{val}«««")
-        print(unpackb(val))
+        print(f"Problematic value: »»»{val}«««", flush=True)
+        print(unpackb(val), flush=True)
         raise e from None
 
 
-def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True, autopack_when_url=False):
+def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True, autopack_when_url=False, prefix="\r"):
     """
     Generator that skips already processed (or still being processed) items from 'iterable'
 
@@ -183,6 +183,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True,
     else:  # pragma: no cover
         ctx = dict__url
 
+    print("Started scheduler", flush=True)
     for c, item in enumerate(iterable):
         # Try to avoid race condition between checking absence and marking as started.
         now = packb(datetime.utcnow())
@@ -205,7 +206,7 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True,
                 status, action = ("just started by other", "skipping") if dic[item] != now else ("is new", "starting")
 
         if logstep is not None and c % logstep == 0:
-            print(f"{'                          ' if action == 'skipping' else datetime.now()} '{item}' {status}, {action}")
+            print(f"{prefix}{'                          ' if action == 'skipping' else datetime.now()} '{item}' {status}, {action}", flush=True)
         if action != "skipping":
             if timeout is None:
                 yield item
@@ -224,4 +225,4 @@ def locker(iterable, dict__url=None, timeout=None, logstep=1, mark_as_done=True,
                     del dic[item]
 
             if logstep is not None and c % logstep == 0:
-                print(f"{datetime.now()} '{item}' done")
+                print(f"{prefix}{datetime.now()} '{item}' done", flush=True)

@@ -96,6 +96,7 @@ class Scheduler:
     logstep: int = 1
     mark_as_done: bool = True
     autopack_when_url: bool = False
+    prefix: str = "\r"
 
     def __post_init__(self):
         self.list_of_iterators = []

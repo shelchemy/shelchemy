@@ -1,1 +1,1 @@
-Add flag `autopack_when_url` to enable choice of compression when db is given as a url
+Add parameter `prefix`
